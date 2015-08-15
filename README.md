@@ -4,16 +4,15 @@ A library for Dart developers. It is awesome.
 
 ## Usage
 
-A simple usage example:
-
-    import 'package:table/table.dart';
-
-    main() {
-      var awesome = new Awesome();
-    }
-
+Create a table with two columns
+```dart
+Table t = new Table()
+  ..addColumn(['BWI', 'BWI', 'BOS'], name: 'code')
+  ..addColumn([1, 2, 3], name: 'value');
+```
 ## Features and bugs
 
 Please file feature requests and bugs at the [issue tracker][tracker].
 
-[tracker]: http://example.com/issues/replaceme
+[tracker]: https://github.com/thumbert/table/issues
+
