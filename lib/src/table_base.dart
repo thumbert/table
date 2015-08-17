@@ -462,27 +462,27 @@ class Table extends Object with IterableMixin<Map>{
 
   /**
    * Order the rows of the table with a natural order for some column names.
-   * [columnName] is a Map with the column name as the key and with the value either 1
+   * [orderBy] is a Map with the column name as the key and with the value either 1
    * (if the ordering is from lowest to highest) or -1 (if the ordering is to be done
    * from highest to lowest).
    *
-   * For example, [columnNames = {'id': 1, 'code':-1}] will sort ascendingly on
-   * colum [id] and descendingly on column [code].
+   * For example, [orderBy = {'id': 1, 'code':-1}] will sort ascendingly on
+   * column [id] and descendingly on column [code].
    *
    * Return a new table.
    */
-  Table order(Map<String,int> columnNames) {
-    List<String> keys = columnNames.keys.toList();
+  Table order(Map<String,int> orderBy) {
+    List<String> keys = orderBy.keys.toList();
     if (colnames.first != keys.first)
       throw 'Column name ${keys.first} does not exist.';
     Ordering ord = new Ordering.natural().onResultOf((Map row) => row[keys.first]);
-    if (columnNames[keys.first] == -1)
+    if (orderBy[keys.first] == -1)
       ord = ord.reverse();
     keys.skip(1).forEach((String name) {
       if (!colnames.contains(name))
         throw 'Column name $name does not exist.';
       var aux = new Ordering.natural().onResultOf((Map row) => row[name]);
-      if (columnNames[name] == -1)
+      if (orderBy[name] == -1)
         aux = aux.reverse();
       ord = ord.compound(aux);
     });
@@ -495,7 +495,7 @@ class Table extends Object with IterableMixin<Map>{
    *
    * Return a new table.
    */
-  Table orderBy(Ordering ordering) => new Table.from(ordering.sorted(this));
+  Table orderWith(Ordering ordering) => new Table.from(ordering.sorted(this));
 
 
 
@@ -615,7 +615,7 @@ class _TableIterator extends Iterator<Map>{
   int nrow;
   Table _table;
 
-  TableIterator(Table this._table) {
+  _TableIterator(Table this._table) {
     nrow = _table.nrow;
     ind = 0;
   }
