@@ -109,7 +109,7 @@ class Table extends Object with IterableMixin<Map>{
     }
   }
 
-  Iterator<Map> get iterator => new TableIterator(this);
+  Iterator<Map> get iterator => new _TableIterator(this);
 
   /**
    * Add a column to this table.  When you add a new column to the table, the data you add
@@ -609,7 +609,7 @@ class Table extends Object with IterableMixin<Map>{
 }
 
 
-class TableIterator extends Iterator<Map>{
+class _TableIterator extends Iterator<Map>{
   Map _current;
   int ind;
   int nrow;
@@ -635,11 +635,4 @@ class TableIterator extends Iterator<Map>{
 }
 
 
-
-class Row {
-  Map data;
-  Row(Map this.data);
-
-  String toString() => data.toString();
-}
 
