@@ -63,6 +63,16 @@ table_simple() {
       expect(t['value'].data, [2, 4]);
     });
 
+    test('construct table from row iterator (non-strict)', () {
+      List rows = [{'code': 'BOS', 'value': 2}, {'Tmin': 24, 'code': 'BOS'}];
+      Table t = new Table.from(rows, strict: false);
+      expect(t.nrow, 2);
+      expect(t.ncol, 3);
+      expect(t.colnames, ['code', 'value', 'Tmin']);
+      expect(t['value'].data, [2, null]);
+      expect(t['Tmin'].data, [null, 24]);
+    });
+
     test('construct table from cartesian product', () {
       Table t = new Table.fromCartesianProduct([
         new Column(['BWI', 'BOS', 'LAX'], 'code'),
@@ -295,11 +305,12 @@ table_simple() {
       ]);
 
       var gT1 = t.groupApply((x) => x.length, ['month'], ['Tmin', 'Tmax']);
-      print(gT1);
+      expect(gT1['Tmin'].data, [4,4]);
+      expect(gT1['Tmax'].data, [4,4]);
 
-      var gT2 =
-          t.groupApply((x) => x.length, ['month', 'code'], ['Tmin', 'Tmax']);
-      print(gT2);
+      var gT2 = t.groupApply((x) => x.length, ['month', 'code'], ['Tmin', 'Tmax']);
+      expect(gT2['Tmin'].data, [2,2,2,2]);
+      expect(gT2['Tmax'].data, [2,2,2,2]);
     });
   });
 }

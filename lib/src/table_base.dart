@@ -74,17 +74,23 @@ class Table extends Object with IterableMixin<Map>{
    * This is different from the [rbind] method if the [strict]
    * argument is [true].
    */
-  Table.from(Iterable rows) {
-    _colnames = rows.first.keys.toList();
+  Table.from(Iterable rows, {bool strict: true}) {
+    if (strict) {
+      _colnames = rows.first.keys.toList();
+    } else {
+      // it's easiest to traverse twice -- unfortunately
+      Set _names = new Set();
+      rows.forEach((Map row) => _names = _names.union(row.keys.toSet()));
+      _colnames = _names.toList();
+    }
     _colnames.forEach((name) => _data.add(new Column([], name)));
     Map _ind = new Map.fromIterables(_colnames, new List.generate(_colnames.length, (i) => i));
 
-    rows.forEach((Map row) {
-      row.forEach((k,v) {
-        _data[_ind[k]].data.add(v);
-      });
+    rows.forEach((Map row){
+      _colnames.forEach((k) => _data[_ind[k]].data.add(row[k])); // will add null if not in row
     });
   }
+
 
   /**
    * Create a table by taking the Cartesian product of a list of Columns.
@@ -524,6 +530,35 @@ class Table extends Object with IterableMixin<Map>{
     // remove the null values from the melted table
     return new Table.from(t.where((Map row) => row['value'] != null));
   }
+
+  /**
+   * Table must be in long form before cast is called.
+   *
+   */
+  Table cast(List<String> vertical, List<String> horizontal, Function f,
+             {String variable: 'value'}) {
+    List _allGroups = new List.from(vertical)..addAll(horizontal);
+
+    // group rows by
+    Function _fg = (Map row) =>
+    new Map.fromIterables(_allGroups, _allGroups.map((g) => row[g]));
+    Map ind = _groupByIndex(this, _fg);
+    int indValue = colnames.indexOf(variable);
+
+    List res = [];
+    ind.forEach((k,List v) {
+      Map row = {};
+      vertical.forEach((name) => row[name] = k[name]);
+
+      List newName = [];
+      horizontal.forEach((hName) => newName.add(k[hName]));
+      row[newName.join('_')] = f(v.map((e) => _data[indValue].data[e]));
+      res.add(row);
+    });
+
+    return new Table.from(res);
+  }
+
 
 
   /**
