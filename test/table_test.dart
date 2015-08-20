@@ -65,7 +65,7 @@ table_simple() {
 
     test('construct table from row iterator (non-strict)', () {
       List rows = [{'code': 'BOS', 'value': 2}, {'Tmin': 24, 'code': 'BOS'}];
-      Table t = new Table.from(rows, strict: false);
+      Table t = new Table.from(rows, colnamesFromFirstRow: false);
       expect(t.nrow, 2);
       expect(t.ncol, 3);
       expect(t.colnames, ['code', 'value', 'Tmin']);
@@ -304,14 +304,27 @@ table_simple() {
         {'code': 'BWI', 'month': 'Feb', 'day': 2, 'Tmin': 37, 'Tmax': 50}
       ]);
 
-      var gT1 = t.groupApply((x) => x.length, ['month'], ['Tmin', 'Tmax']);
+      var gT1 = t.groupApply(['month'], ['Tmin', 'Tmax'], (x) => x.length);
       expect(gT1['Tmin'].data, [4,4]);
       expect(gT1['Tmax'].data, [4,4]);
 
-      var gT2 = t.groupApply((x) => x.length, ['month', 'code'], ['Tmin', 'Tmax']);
+      var gT2 = t.groupApply(['month', 'code'], ['Tmin', 'Tmax'], (x) => x.length);
       expect(gT2['Tmin'].data, [2,2,2,2]);
       expect(gT2['Tmax'].data, [2,2,2,2]);
     });
+
+    test('roll apply', () {
+      DateTime startDt = new DateTime(2015);
+      List days = new List.generate(10, (i) => startDt.add(new Duration(days: i)));
+      Function sum = (Iterable x) => x.reduce((a,b) => a+b);
+      Table t = new Table()
+        ..addColumn(days, name: 'day')
+        ..addColumn([0,1,0,1,2,1,3,1,2,5], name: 'value');
+      t..addColumn(t.rollApply('value', 3, sum), name: 'cumsum3');
+
+      print(t);
+    });
+
   });
 }
 
@@ -324,7 +337,7 @@ speed_test() {
   print(t.head());
 
   Function mean = (Iterable x) => x.reduce((a, b) => a + b) / x.length;
-  Table agg = t.groupApply(mean, ['id'], ['value']);
+  Table agg = t.groupApply(['id'], ['value'], mean);
   print(agg.head());
   print(agg.sample());
 }

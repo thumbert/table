@@ -1,6 +1,3 @@
-// Copyright (c) 2015, <your name>. All rights reserved. Use of this source code
-// is governed by a BSD-style license that can be found in the LICENSE file.
-
 
 library table.base;
 
@@ -15,6 +12,11 @@ enum JOIN_TYPE {
   LEFT_JOIN,
   RIGHT_JOIN,
   INNER_JOIN
+}
+
+enum ALIGN_TYPE {
+  FIRST,
+  LAST
 }
 
 class Column<E> {
@@ -41,23 +43,28 @@ class Column<E> {
 
 
 /**
- * A tabular view of columnar data iterable by row.
+ * A tabular view of columnar data iterable by row.  A table holds observations
+ * of different variables.  Each variable is stored in a [Column].
+ *
+ * Data in columns is supposed to be of the same type, although this
+ * is not enforced.
+ *
+ * Conceptually, we distinguish variables in two groups.
+ * Categorical/classification/id variables and measurement variables.  For example,
+ * a categorical variable may be an airport code, and a measurement variable the daily max
+ * temperature at that location.
+ *
+ * The null value is used to indicate missing data only.
+ *
  */
 class Table extends Object with IterableMixin<Map>{
   List<Column> _data = [];
   List<String> _colnames = [];
   static const _rowEquality = const MapEquality();
+  static const _setEquality = const SetEquality();
 
   /**
-   * A table to hold observations of different variables.  Each variable is stored
-   * in a [Column].
-   *
-   * Conceptually, there are two types
-   * of variables: categorical/classification variables and measurement variables.  For example,
-   * a categorical variable may be an airport code, and a measurement variable the daily max
-   * temperature at that location.
-   *
-   * The null value is used to indicate missing data only.
+   * Construct an empty (0 rows) table with columns.
    */
   Table({List<String> colnames}) {
     if (colnames != null) {
@@ -71,11 +78,16 @@ class Table extends Object with IterableMixin<Map>{
    * The first element of the [rows] iterable is used to determine the column names.
    * Only the keys of a row that overlap with the keys from the first row
    * are added to the table.  Rows don't need to have keys in the same order.
-   * This is different from the [rbind] method if the [strict]
-   * argument is [true].
+   *
+   * If [colnamesFromFirstRow] is `true` the keys of the first element of rows
+   * will determine the column names of the table.
+   *
+   * Missing data for a column will be assigned `null`.
+   *
+   *
    */
-  Table.from(Iterable rows, {bool strict: true}) {
-    if (strict) {
+  Table.from(Iterable rows, {bool colnamesFromFirstRow: true}) {
+    if (colnamesFromFirstRow) {
       _colnames = rows.first.keys.toList();
     } else {
       // it's easiest to traverse twice -- unfortunately
@@ -283,17 +295,22 @@ class Table extends Object with IterableMixin<Map>{
   }
 
   /**
-   * Row bind this table with another table.
-   * If [strict] is true, the column names must match.  If [strict] is false,
-   * new columns are created as needed.
-   * Columns don't have to be in the same order, you can rbind [A,B] and [B,A].
+   * Row bind this table with another table.  It adds the observations from [other]
+   * after the observations of this table.
+   *
+   * If [strict] is `true`, the column names must match exactly.
+   *
+   * If [strict] is `false`, new columns are created as needed and filled with `null`s.
+   *
+   * The columns of the [other] table don't have to be in the same order as the columns
+   * of this table.
    */
   Table rbind(Table other, {bool strict: true}) {
-    if (strict && ncol != other.ncol)
+    if (strict && !_setEquality.equals(colnames.toSet(),other.colnames.toSet()))
       throw 'Cannot rbind because columns don\'t match and strict is true';
 
     // columns in other that are not in this table
-    List<String> notInTable = new List.from(other.colnames);  // have problems when I remove!
+    Set<String> notInTable = other.colnames.toSet();
 
     Table t = copy();
     for (int j=0; j<ncol; j++){
@@ -403,7 +420,6 @@ class Table extends Object with IterableMixin<Map>{
         break;
     }
 
-
     return new Table.from(res);
   }
 
@@ -443,7 +459,7 @@ class Table extends Object with IterableMixin<Map>{
    * by the distinct values of the columns indicated by [groupBy].
    *
    */
-  Table groupApply(Function f, List<String> groupBy, List<String> variables) {
+  Table groupApply(List<String> groupBy, List<String> variables, Function f) {
     var by = groupBy.where((e) => colnames.contains(e)).toList();
     List vars = variables.where((e) => colnames.contains(e)).toList();
     Map _colIndex = new Map.fromIterables(colnames, new List.generate(colnames.length, (i) => i));
@@ -464,6 +480,33 @@ class Table extends Object with IterableMixin<Map>{
     return new Table.from(res);
   }
 
+
+  /**
+   * Apply function [f] on a list of [variables] to [width] observations
+   * at a time.
+   *
+   * For example, this method is convenient to calculate moving averages
+   * if the observations of the table are ordered by time.
+   *
+   *
+   */
+  List rollApply(String variable, int width, Function f,
+                  {ALIGN_TYPE align: ALIGN_TYPE.LAST}) {
+    int iEnd = width;
+    List res = [];
+    if (align == ALIGN_TYPE.LAST)
+      res.addAll(new List.filled(width-1, null));
+
+    while (iEnd <= nrow) {
+      res.add(f(this[variable].data.sublist(iEnd-width, iEnd)));
+      iEnd += 1;
+    }
+
+    if (align == ALIGN_TYPE.FIRST)
+      res.addAll(new List.filled(width-1, null));
+
+    return res;
+  }
 
 
   /**
@@ -532,8 +575,24 @@ class Table extends Object with IterableMixin<Map>{
   }
 
   /**
-   * Table must be in long form before cast is called.
+   * Reshape (pivot) a table in the 'long' form.  The [vertical] list indicates the
+   * variables that will remain along the rows.  The variables in the [horizontal]
+   * list will be transposed and the unique values will become columns.
    *
+   * For example, to pivot this 4 rows and 3 columns table
+   * ```
+   * [{'code': 'BOS', 'month': 'Jan', 'value': 10},
+   * {'code': 'BOS', 'month': 'Feb', 'value': 20},
+   * {'code': 'BOS', 'month': 'Mar', 'value': 30},
+   * {'code': 'LAX', 'month': 'Jan', 'value': 40}]
+   * ```
+   * by calling `cast(['code'], ['month'], (x) => x.first)`
+   * you get a table with 2 rows and 4 columns
+   * ```
+   * [{'code': 'BOS', 'Jan': 10, 'Feb': 20, 'Mar': 30},
+   *  {'code': 'LAX', 'Jan': 40, 'Feb': null, 'Mar': null}].
+   *```
+   * Missing values are filled with `null`s.
    */
   Table cast(List<String> vertical, List<String> horizontal, Function f,
              {String variable: 'value'}) {
@@ -556,7 +615,7 @@ class Table extends Object with IterableMixin<Map>{
       res.add(row);
     });
 
-    return new Table.from(res);
+    return new Table.from(res, colnamesFromFirstRow: false);
   }
 
 
@@ -668,6 +727,5 @@ class _TableIterator extends Iterator<Map>{
   }
   Map get current => _current;
 }
-
 
 
