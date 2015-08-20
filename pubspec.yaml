@@ -11,4 +11,5 @@ dependencies:
   more: '^1.4.0'
 
 dev_dependencies:
+  csv: '^2.0.1'
   test: '>=0.12.0 <0.13.0'

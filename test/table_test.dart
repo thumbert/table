@@ -320,9 +320,8 @@ table_simple() {
       Table t = new Table()
         ..addColumn(days, name: 'day')
         ..addColumn([0,1,0,1,2,1,3,1,2,5], name: 'value');
-      t..addColumn(t.rollApply('value', 3, sum), name: 'cumsum3');
-
-      print(t);
+      t..addColumn(t.rollApply('value', 3, sum), name: 'sum3');
+      expect(t['sum3'].data, [null, null, 1, 2, 3, 4, 6, 5, 6, 8]);
     });
 
   });

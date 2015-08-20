@@ -16,7 +16,8 @@ enum JOIN_TYPE {
 
 enum ALIGN_TYPE {
   FIRST,
-  LAST
+  LAST,
+  CENTER
 }
 
 class Column<E> {
@@ -492,10 +493,16 @@ class Table extends Object with IterableMixin<Map>{
    */
   List rollApply(String variable, int width, Function f,
                   {ALIGN_TYPE align: ALIGN_TYPE.LAST}) {
+    if (width % 2 == 0 && align == ALIGN_TYPE.CENTER)
+      throw 'ALIGN_TYPE.CENTER does not work for an even width.';
+
     int iEnd = width;
     List res = [];
     if (align == ALIGN_TYPE.LAST)
       res.addAll(new List.filled(width-1, null));
+    else if (align == ALIGN_TYPE.CENTER)
+      res.addAll(new List.filled(width ~/ 2, null));
+
 
     while (iEnd <= nrow) {
       res.add(f(this[variable].data.sublist(iEnd-width, iEnd)));
@@ -504,6 +511,8 @@ class Table extends Object with IterableMixin<Map>{
 
     if (align == ALIGN_TYPE.FIRST)
       res.addAll(new List.filled(width-1, null));
+    else if (align == ALIGN_TYPE.CENTER)
+      res.addAll(new List.filled(width ~/ 2, null));
 
     return res;
   }
