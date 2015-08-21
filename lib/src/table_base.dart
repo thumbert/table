@@ -63,6 +63,7 @@ class Table extends Object with IterableMixin<Map>{
   List<String> _colnames = [];
   static const _rowEquality = const MapEquality();
   static const _setEquality = const SetEquality();
+  static var _fillValue = null;
 
   /**
    * Construct an empty (0 rows) table with columns.
@@ -99,9 +100,16 @@ class Table extends Object with IterableMixin<Map>{
     _colnames.forEach((name) => _data.add(new Column([], name)));
     Map _ind = new Map.fromIterables(_colnames, new List.generate(_colnames.length, (i) => i));
 
-    rows.forEach((Map row){
-      _colnames.forEach((k) => _data[_ind[k]].data.add(row[k])); // will add null if not in row
-    });
+    if (_fillValue == null) {
+      rows.forEach((Map row) {
+        _colnames.forEach((k) => _data[_ind[k]].data.add(row[k])); // will add null if not in row
+      });
+    } else {
+      rows.forEach((Map row) {
+        _colnames.forEach((k) =>
+          row[k] == null ? _data[_ind[k]].data.add(_fillValue) : _data[_ind[k]].data.add(row[k]));
+      });
+    }
   }
 
 
@@ -604,12 +612,12 @@ class Table extends Object with IterableMixin<Map>{
    * Missing values are filled with `null`s.
    */
   Table cast(List<String> vertical, List<String> horizontal, Function f,
-             {String variable: 'value'}) {
+             {String variable: 'value', fill: null}) {
     List _allGroups = new List.from(vertical)..addAll(horizontal);
 
     // group rows by
     Function _fg = (Map row) =>
-    new Map.fromIterables(_allGroups, _allGroups.map((g) => row[g]));
+      new Map.fromIterables(_allGroups, _allGroups.map((g) => row[g]));
     Map ind = _groupByIndex(this, _fg);
     int indValue = colnames.indexOf(variable);
 
@@ -624,7 +632,11 @@ class Table extends Object with IterableMixin<Map>{
       res.add(row);
     });
 
-    return new Table.from(res, colnamesFromFirstRow: false);
+    if (fill != null) _fillValue = fill;
+    Table t = new Table.from(res, colnamesFromFirstRow: false);
+
+    if (fill != null) _fillValue = null;  // restore the default
+    return t;
   }
 
 

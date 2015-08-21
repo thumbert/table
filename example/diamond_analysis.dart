@@ -15,7 +15,7 @@ import 'package:table/table.dart';
  * Pull the diamond data from the web.  Hopefully the url is stable.
  * Return a table.
  */
-Future<Table> load_data() async {
+Future<Table> loadData() async {
   String url = "https://vincentarelbundock.github.io/Rdatasets/csv/Ecdat/Diamond.csv";
   HttpClientRequest request = await new HttpClient().getUrl(Uri.parse(url));
   HttpClientResponse response = await request.close();
@@ -29,9 +29,25 @@ Future<Table> load_data() async {
   return new Table.from(rows);
 }
 
+dataAnalysis(Table data){
+  print('\ncount of diamonds per clarity');
+  Table c = data.groupApply(['clarity'], ['clarity'], (x) => x.length);
+  print(c);
+
+  print('\ncount of clarity vs. color');
+  Table cc = data.cast(['clarity'], ['color'], (x) => x.length, fill: 0);
+  print(cc);
+
+
+}
+
+
 main() async {
 
-  Table data = await load_data();
+  Table data = await loadData();
   print(data.head());
+  print('number of rows: ${data.nrow}');
+
+  dataAnalysis(data);
 
 }
