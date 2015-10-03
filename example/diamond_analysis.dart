@@ -7,7 +7,7 @@ import 'package:csv/csv.dart';
 import 'package:table/table.dart';
 
 /**
- * Investigate how fluid is the table interface for basic data analysis.
+ * Investigate how fluid the table interface is for basic data analysis.
  *
  */
 

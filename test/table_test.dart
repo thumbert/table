@@ -3,6 +3,8 @@
 
 library table.test;
 
+import 'package:more/ordering.dart';
+
 import 'package:test/test.dart';
 import 'package:table/table.dart';
 
@@ -236,17 +238,6 @@ table_simple() {
       expect(t['Tmin'][0], 30);
     });
 
-    test('melt table', () {
-      List rows = [
-        {'code': 'BOS', 'Tmin': 31, 'Tmax': 95},
-        {'code': 'BOS', 'Tmin': 30, 'Tmax': null},
-        {'code': 'BWI', 'Tmin': 32, 'Tmax': 100}
-      ];
-      Table t = new Table.from(rows);
-      Table tm = t.melt(['code']);
-      expect(tm.nrow, 5);
-    });
-
     test('order table', () {
       List rows = [
         {'code': 'BOS', 'Tmin': 31, 'Tmax': 95},
@@ -258,6 +249,23 @@ table_simple() {
       Table to = t.order({'code': -1, 'Tmin': 1});
       expect(to['code'].data, ['BWI', 'BWI', 'BOS', 'BOS']);
       expect(to['Tmin'].data, [32, 37, 30, 31]);
+    });
+
+    test('order table 2', () {
+      List rows = [
+        {'code': 'BOS', 'Tmin': 31, 'Tmax': 95},
+        {'code': 'BWI', 'Tmin': 37, 'Tmax': 95},
+        {'code': 'BOS', 'Tmin': 30, 'Tmax': null},
+        {'code': 'BWI', 'Tmin': 32, 'Tmax': 100}
+      ];
+      Table t = new Table.from(rows);
+      Table t1 = t.order({'Tmin': 1});
+      expect(t1['code'].data, ['BOS', 'BOS', 'BWI', 'BWI']);
+      expect(t1['Tmin'].data, [30, 31, 32, 37]);
+
+      // order with nulls
+      Table t2 = t.order({'Tmax': -1});
+      print(t2);
     });
 
     test('joins by one column', () {
@@ -313,6 +321,38 @@ table_simple() {
       expect(gT2['Tmax'].data, [2,2,2,2]);
     });
 
+    test('group apply 2', () {
+      Table t = new Table.from([
+        {'farm': 'A', 'checked': true, 'meatType': 'poultry', 'quantity': 10},
+        {'farm': 'A', 'checked': true, 'meatType': 'pork', 'quantity': 20},
+        {'farm': 'A', 'checked': false, 'meatType': 'beef', 'quantity': 30},
+        {'farm': 'B', 'checked': true, 'meatType': 'poultry', 'quantity': 15},
+        {'farm': 'B', 'checked': false, 'meatType': 'pork', 'quantity': 25},
+        {'farm': 'B', 'checked': true, 'meatType': 'beef', 'quantity': 35}
+      ]);
+      Function sum = (Iterable<num> x) => x.reduce((a,b) => a+b);
+      Table gT = t.groupApply(['farm', 'checked'], ['quantity'], sum);
+      expect(gT['farm'].data, ['A', 'A', 'B', 'B']);
+      expect(gT['checked'].data, [true, false, true, false]);
+      expect(gT['quantity'].data, [30, 30, 50, 25]);
+    });
+
+    test('melt table', () {
+      List rows = [
+        {'code': 'BOS', 'Tmin': 31, 'Tmax': 95},
+        {'code': 'BOS', 'Tmin': 30, 'Tmax': null},
+        {'code': 'BWI', 'Tmin': 32, 'Tmax': 100}
+      ];
+      Table t = new Table.from(rows);
+      Table tm = t.melt(['code']);
+      expect(tm.nrow, 5);
+    });
+
+    test('cast table', () {
+
+    });
+
+
     test('roll apply', () {
       DateTime startDt = new DateTime(2015);
       List days = new List.generate(10, (i) => startDt.add(new Duration(days: i)));
@@ -345,5 +385,9 @@ main() {
   table_simple();
   column_test();
   //speed_test();
+
+//  Ordering ord = new Ordering.natural().nullsFirst();
+//  List x = [1, null, 6, 3, 2];
+//  print(ord.sorted(x));
 
 }

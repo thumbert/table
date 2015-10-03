@@ -1,4 +1,3 @@
-
 library table.base;
 
 import 'dart:collection';
@@ -6,19 +5,11 @@ import 'dart:math';
 import 'package:collection/equality.dart';
 import 'package:more/ordering.dart';
 
+enum JOIN_TYPE { OUTER_JOIN, LEFT_JOIN, RIGHT_JOIN, INNER_JOIN }
 
-enum JOIN_TYPE {
-  OUTER_JOIN,
-  LEFT_JOIN,
-  RIGHT_JOIN,
-  INNER_JOIN
-}
+enum ALIGN_TYPE { FIRST, LAST, CENTER }
 
-enum ALIGN_TYPE {
-  FIRST,
-  LAST,
-  CENTER
-}
+enum NullOrdering { FIRST, LAST }
 
 class Column<E> {
   List<E> data;
@@ -39,9 +30,7 @@ class Column<E> {
   }
 
   String toString() => _paddedOutput().join('\n');
-
 }
-
 
 /**
  * A tabular view of columnar data iterable by row.  A table holds observations
@@ -50,15 +39,15 @@ class Column<E> {
  * Data in columns is supposed to be of the same type, although this
  * is not enforced.
  *
- * Conceptually, we distinguish variables in two groups.
+ * Conceptually, variables belong in two separate groups.
  * Categorical/classification/id variables and measurement variables.  For example,
- * a categorical variable may be an airport code, and a measurement variable the daily max
- * temperature at that location.
+ * a categorical variable may be an airport code, and a measurement variable
+ * may be the daily max temperature at that location.
  *
  * The null value is used to indicate missing data only.
  *
  */
-class Table extends Object with IterableMixin<Map>{
+class Table extends Object with IterableMixin<Map> {
   List<Column> _data = [];
   List<String> _colnames = [];
   static const _rowEquality = const MapEquality();
@@ -98,20 +87,22 @@ class Table extends Object with IterableMixin<Map>{
       _colnames = _names.toList();
     }
     _colnames.forEach((name) => _data.add(new Column([], name)));
-    Map _ind = new Map.fromIterables(_colnames, new List.generate(_colnames.length, (i) => i));
+    Map _ind = new Map.fromIterables(
+        _colnames, new List.generate(_colnames.length, (i) => i));
 
     if (_fillValue == null) {
       rows.forEach((Map row) {
-        _colnames.forEach((k) => _data[_ind[k]].data.add(row[k])); // will add null if not in row
+        _colnames.forEach((k) =>
+            _data[_ind[k]].data.add(row[k])); // will add null if not in row
       });
     } else {
       rows.forEach((Map row) {
-        _colnames.forEach((k) =>
-          row[k] == null ? _data[_ind[k]].data.add(_fillValue) : _data[_ind[k]].data.add(row[k]));
+        _colnames.forEach((k) => row[k] == null
+            ? _data[_ind[k]].data.add(_fillValue)
+            : _data[_ind[k]].data.add(row[k]));
       });
     }
   }
-
 
   /**
    * Create a table by taking the Cartesian product of a list of Columns.
@@ -119,17 +110,18 @@ class Table extends Object with IterableMixin<Map>{
    */
   Table.fromCartesianProduct(List<Column> columns) {
     _colnames = columns.map((e) => e.name).toList();
-    int N = columns.fold(1, (a,Column b) => a*b.data.length);
+    int N = columns.fold(1, (a, Column b) => a * b.data.length);
     // how many times I repeat each element of the columns
     List<int> nEach = columns.map((e) {
       N ~/= e.data.length;
       return N;
     }).toList();
 
-    for (int j=0; j<ncol; j++) {
-      Iterable block = columns[j].data.expand((e) => new List.generate(nEach[j], (i) => e));
+    for (int j = 0; j < ncol; j++) {
+      Iterable block =
+          columns[j].data.expand((e) => new List.generate(nEach[j], (i) => e));
       // how many times you repeat the block
-      int nReps = columns.take(j).fold(1, (a,Column b) => a*b.data.length);
+      int nReps = columns.take(j).fold(1, (a, Column b) => a * b.data.length);
       List cj = [];
       new List.generate(nReps, (i) => block).forEach((e) => cj.addAll(e));
       _data.add(new Column(cj, columns[j].name));
@@ -147,9 +139,10 @@ class Table extends Object with IterableMixin<Map>{
    *
    */
   void addColumn(List x, {String name}) {
-    if (ncol > 0 && nrow != x.length)
-      throw 'Cannot add column.  Number of rows does not match';
-    if (name == null) name = _makeColumnName(ncol+1);
+    if (ncol > 0 &&
+        nrow !=
+            x.length) throw 'Cannot add column.  Number of rows does not match';
+    if (name == null) name = _makeColumnName(ncol + 1);
     else if (_colnames.contains(name)) {
       throw 'Column ${name} already exists, and strict = true';
     }
@@ -168,30 +161,26 @@ class Table extends Object with IterableMixin<Map>{
   void addRow(Map x) {
     if (nrow == 0) {
       // you add all the Map to the table
-      x.forEach((k,v) {
+      x.forEach((k, v) {
         _colnames.add(k);
         _data.add(new Column([v], k));
       });
     } else {
-      colnames.forEach((name){
+      colnames.forEach((name) {
         this[name].data.add(x[name]);
       });
     }
   }
-
 
   /**
    * Get the row i of the table as a Map.
    */
   Map row(int i) {
     Map res = {};
-    for (int j=0; j<ncol; j++)
-      res[_colnames[j]] = column(j).data[i];
+    for (int j = 0; j < ncol; j++) res[_colnames[j]] = column(j).data[i];
 
     return res;
   }
-
-
 
   /**
    * Get column i.
@@ -231,7 +220,6 @@ class Table extends Object with IterableMixin<Map>{
     _colnames[j] = name;
   }
 
-
   /**
    * Apply function [f] to each column (possibly to a subset of columns specified by
    * [columnNames], by certain groups specified by [byColumnNames]),
@@ -249,19 +237,21 @@ class Table extends Object with IterableMixin<Map>{
   }
 
   /**
-   * Get the distinct rows in the table.  You can restrict which columns you want
-   * to show the distinct values.
+   * Get the distinct rows in the table.
+   *
+   * You can restrict which columns you want to show the distinct values
+   * by specifying the [columnNames] list.
    */
   Table distinct({List<String> columnNames}) {
-    Set uRows = new LinkedHashSet(equals: _rowEquality.equals,
-    isValidKey: _rowEquality.isValidKey,
-    hashCode: (e) => _rowEquality.hash(e));
+    Set uRows = new LinkedHashSet(
+        equals: _rowEquality.equals,
+        isValidKey: _rowEquality.isValidKey,
+        hashCode: (e) => _rowEquality.hash(e));
     if (columnNames == null) {
-      for (int i=0; i<nrow; i++)
-        uRows.add(row(i));
+      for (int i = 0; i < nrow; i++) uRows.add(row(i));
     } else {
       Map aux = {};
-      for (int i=0; i<nrow; i++) {
+      for (int i = 0; i < nrow; i++) {
         Map rowi = row(i);
         columnNames.forEach((name) => aux[name] = rowi[name]);
         uRows.add(aux);
@@ -276,8 +266,9 @@ class Table extends Object with IterableMixin<Map>{
    */
   Table copy() {
     Table t = new Table();
-    for (int j=0; j<ncol; j++)
-      t.addColumn(new List.from(column(j).data), name: colnames[j]);
+    for (int j = 0;
+        j < ncol;
+        j++) t.addColumn(new List.from(column(j).data), name: colnames[j]);
 
     return t;
   }
@@ -288,15 +279,14 @@ class Table extends Object with IterableMixin<Map>{
    * the column name gets prepended with '_Y'.
    */
   Table cbind(Table other) {
-    if (nrow != other.nrow)
-      throw 'Cannot cbind as tables don\'t have the same number of rows!';
+    if (nrow !=
+        other.nrow) throw 'Cannot cbind as tables don\'t have the same number of rows!';
     Set sNames = colnames.toSet();
 
     Table t = copy();
-    for (int j=0; j<other.ncol; j++){
+    for (int j = 0; j < other.ncol; j++) {
       String name = other.colnames[j];
-      if (sNames.contains(name))
-        name = '${name}_Y';
+      if (sNames.contains(name)) name = '${name}_Y';
       t.addColumn(other.column(j).data, name: name);
     }
 
@@ -315,14 +305,17 @@ class Table extends Object with IterableMixin<Map>{
    * of this table.
    */
   Table rbind(Table other, {bool strict: true}) {
-    if (strict && !_setEquality.equals(colnames.toSet(),other.colnames.toSet()))
-      throw 'Cannot rbind because columns don\'t match and strict is true';
+    if (strict &&
+        !_setEquality.equals(
+            colnames.toSet(),
+            other.colnames
+                .toSet())) throw 'Cannot rbind because columns don\'t match and strict is true';
 
     // columns in other that are not in this table
     Set<String> notInTable = other.colnames.toSet();
 
     Table t = copy();
-    for (int j=0; j<ncol; j++){
+    for (int j = 0; j < ncol; j++) {
       String name = colnames[j];
       if (other.colnames.contains(name)) {
         // column exists in the other table
@@ -349,22 +342,28 @@ class Table extends Object with IterableMixin<Map>{
    *
    */
   Table joinTable(Table other, JOIN_TYPE type) {
-    List<String> by = colnames.toSet().intersection(other.colnames.toSet()).toList();
-    if (by.isEmpty)
-      throw 'No common column names found between the two tables.';
+    List<String> by =
+        colnames.toSet().intersection(other.colnames.toSet()).toList();
+    if (by.isEmpty) throw 'No common column names found between the two tables.';
 
     // split each table into groups of rows with same common by values
-    var g1 = _groupBy(this, (e) => new Map.fromIterables(by,
-    new List.generate(by.length, (i) => e[by[i]])));
-    var g2 = _groupBy(other, (e) => new Map.fromIterables(by,
-    new List.generate(by.length, (i) => e[by[i]])));
-    Set g1k = new LinkedHashSet(equals: _rowEquality.equals,
-    isValidKey: _rowEquality.isValidKey,
-    hashCode: (e) => _rowEquality.hash(e));
+    var g1 = _groupBy(
+        this,
+        (e) => new Map.fromIterables(
+            by, new List.generate(by.length, (i) => e[by[i]])));
+    var g2 = _groupBy(
+        other,
+        (e) => new Map.fromIterables(
+            by, new List.generate(by.length, (i) => e[by[i]])));
+    Set g1k = new LinkedHashSet(
+        equals: _rowEquality.equals,
+        isValidKey: _rowEquality.isValidKey,
+        hashCode: (e) => _rowEquality.hash(e));
     g1k.addAll(g1.keys);
-    Set g2k = new LinkedHashSet(equals: _rowEquality.equals,
-    isValidKey: _rowEquality.isValidKey,
-    hashCode: (e) => _rowEquality.hash(e));
+    Set g2k = new LinkedHashSet(
+        equals: _rowEquality.equals,
+        isValidKey: _rowEquality.isValidKey,
+        hashCode: (e) => _rowEquality.hash(e));
     g2k.addAll(g2.keys);
 
     List<Map> res = [];
@@ -386,7 +385,8 @@ class Table extends Object with IterableMixin<Map>{
     _addLeftOnlyRows() {
       // filler for the missing columns in this other table; the columns in other that are not in by
       List rKeys = other.colnames.toSet().difference(by.toSet()).toList();
-      Map rFill = new Map.fromIterables(rKeys, new List.filled(rKeys.length, null));
+      Map rFill =
+          new Map.fromIterables(rKeys, new List.filled(rKeys.length, null));
 
       // loop only over the keys that are missing in other table
       for (var group in g1k.difference(g2k)) {
@@ -396,10 +396,11 @@ class Table extends Object with IterableMixin<Map>{
         }
       }
     }
-    _addRightOnlyRows(){
+    _addRightOnlyRows() {
       // filler for the missing columns in this table; the columns in this that are not in by
       List lKeys = colnames.toSet().difference(by.toSet()).toList();
-      Map lFill = new Map.fromIterables(lKeys, new List.filled(lKeys.length, null));
+      Map lFill =
+          new Map.fromIterables(lKeys, new List.filled(lKeys.length, null));
 
       // loop only over the keys that are missing in this table
       for (var group in g2k.difference(g1k)) {
@@ -411,19 +412,19 @@ class Table extends Object with IterableMixin<Map>{
     }
 
     switch (type) {
-      case JOIN_TYPE.INNER_JOIN :
+      case JOIN_TYPE.INNER_JOIN:
         _addInnerRows();
         break;
-      case JOIN_TYPE.OUTER_JOIN :
+      case JOIN_TYPE.OUTER_JOIN:
         _addInnerRows();
         _addLeftOnlyRows();
         _addRightOnlyRows();
         break;
-      case JOIN_TYPE.LEFT_JOIN :
+      case JOIN_TYPE.LEFT_JOIN:
         _addInnerRows();
         _addLeftOnlyRows();
         break;
-      case JOIN_TYPE.RIGHT_JOIN :
+      case JOIN_TYPE.RIGHT_JOIN:
         _addInnerRows();
         _addRightOnlyRows();
         break;
@@ -436,9 +437,10 @@ class Table extends Object with IterableMixin<Map>{
    * Utility to group rows by a given function.
    */
   Map _groupBy(Iterable x, Function f) {
-    Map result = new LinkedHashMap(equals: _rowEquality.equals,
-    isValidKey: _rowEquality.isValidKey,
-    hashCode: (e) => _rowEquality.hash(e));
+    Map result = new LinkedHashMap(
+        equals: _rowEquality.equals,
+        isValidKey: _rowEquality.isValidKey,
+        hashCode: (e) => _rowEquality.hash(e));
     x.forEach((v) => result.putIfAbsent(f(v), () => []).add(v));
 
     return result;
@@ -450,9 +452,10 @@ class Table extends Object with IterableMixin<Map>{
    * Function [f] takes an element of the iterable and returns a grouping value.
    */
   Map _groupByIndex(Iterable x, Function f) {
-    Map result = new LinkedHashMap(equals: _rowEquality.equals,
-    isValidKey: _rowEquality.isValidKey,
-    hashCode: (e) => _rowEquality.hash(e));
+    Map result = new LinkedHashMap(
+        equals: _rowEquality.equals,
+        isValidKey: _rowEquality.isValidKey,
+        hashCode: (e) => _rowEquality.hash(e));
 
     int ind = 0;
     x.forEach((v) {
@@ -466,15 +469,23 @@ class Table extends Object with IterableMixin<Map>{
   /**
    * Apply function [f] to different groups of rows.  Rows are grouped
    * by the distinct values of the columns indicated by [groupBy].
+   * Function [f] takes and [Iterable] and returns a single value.
    *
+   * For example to calculate the sum by the [groupBy] variables,
+   * ```
+   * Function f = (Iterable<num> x) => x.reduce((a,b) => a+b);
+   * ```
    */
   Table groupApply(List<String> groupBy, List<String> variables, Function f) {
     var by = groupBy.where((e) => colnames.contains(e)).toList();
     List vars = variables.where((e) => colnames.contains(e)).toList();
-    Map _colIndex = new Map.fromIterables(colnames, new List.generate(colnames.length, (i) => i));
+    Map _colIndex = new Map.fromIterables(
+        colnames, new List.generate(colnames.length, (i) => i));
 
-    Map groups = _groupByIndex(this, (e) => new Map.fromIterables(by,
-    new List.generate(by.length, (i) => e[by[i]])));
+    Map groups = _groupByIndex(
+        this,
+        (e) => new Map.fromIterables(
+            by, new List.generate(by.length, (i) => e[by[i]])));
 
     List res = [];
     groups.forEach((Map k, List ind) {
@@ -489,7 +500,6 @@ class Table extends Object with IterableMixin<Map>{
     return new Table.from(res);
   }
 
-
   /**
    * Apply function [f] on a list of [variables] to [width] observations
    * at a time.
@@ -500,31 +510,28 @@ class Table extends Object with IterableMixin<Map>{
    *
    */
   List rollApply(String variable, int width, Function f,
-                  {ALIGN_TYPE align: ALIGN_TYPE.LAST}) {
-    if (width % 2 == 0 && align == ALIGN_TYPE.CENTER)
-      throw 'ALIGN_TYPE.CENTER does not work for an even width.';
+      {ALIGN_TYPE align: ALIGN_TYPE.LAST}) {
+    if (width % 2 == 0 &&
+        align ==
+            ALIGN_TYPE.CENTER) throw 'ALIGN_TYPE.CENTER does not work for an even width.';
 
     int iEnd = width;
     List res = [];
-    if (align == ALIGN_TYPE.LAST)
-      res.addAll(new List.filled(width-1, null));
-    else if (align == ALIGN_TYPE.CENTER)
-      res.addAll(new List.filled(width ~/ 2, null));
-
+    if (align == ALIGN_TYPE.LAST) res.addAll(new List.filled(width - 1, null));
+    else if (align == ALIGN_TYPE.CENTER) res
+        .addAll(new List.filled(width ~/ 2, null));
 
     while (iEnd <= nrow) {
-      res.add(f(this[variable].data.sublist(iEnd-width, iEnd)));
+      res.add(f(this[variable].data.sublist(iEnd - width, iEnd)));
       iEnd += 1;
     }
 
-    if (align == ALIGN_TYPE.FIRST)
-      res.addAll(new List.filled(width-1, null));
-    else if (align == ALIGN_TYPE.CENTER)
-      res.addAll(new List.filled(width ~/ 2, null));
+    if (align == ALIGN_TYPE.FIRST) res.addAll(new List.filled(width - 1, null));
+    else if (align == ALIGN_TYPE.CENTER) res
+        .addAll(new List.filled(width ~/ 2, null));
 
     return res;
   }
-
 
   /**
    * Order the rows of the table with a natural order for some column names.
@@ -537,20 +544,29 @@ class Table extends Object with IterableMixin<Map>{
    *
    * Return a new table.
    */
-  Table order(Map<String,int> orderBy) {
+  Table order(Map<String, int> orderBy,
+      {NullOrdering nullOrdering: NullOrdering.FIRST}) {
     List<String> keys = orderBy.keys.toList();
-    if (colnames.first != keys.first)
-      throw 'Column name ${keys.first} does not exist.';
-    Ordering ord = new Ordering.natural().onResultOf((Map row) => row[keys.first]);
-    if (orderBy[keys.first] == -1)
-      ord = ord.reverse();
-    keys.skip(1).forEach((String name) {
-      if (!colnames.contains(name))
-        throw 'Column name $name does not exist.';
-      var aux = new Ordering.natural().onResultOf((Map row) => row[name]);
-      if (orderBy[name] == -1)
-        aux = aux.reverse();
-      ord = ord.compound(aux);
+    Ordering ord;
+
+    keys.forEach((String name) {
+      if (!colnames.contains(name)) throw 'Column name $name does not exist.';
+      Ordering aux = new Ordering.natural();
+      aux = aux.onResultOf((Map row) => row[name]);
+      if (orderBy[name] == -1) aux = aux.reverse();
+      switch (nullOrdering) {
+        case NullOrdering.FIRST:
+          aux = aux.nullsFirst();
+          break;
+        case NullOrdering.LAST:
+          aux = aux.nullsLast();
+          break;
+      }
+      if (name == keys.first) {
+        ord = aux;
+      } else {
+        ord = ord.compound(aux);
+      }
     });
 
     return new Table.from(ord.sorted(this));
@@ -563,8 +579,6 @@ class Table extends Object with IterableMixin<Map>{
    */
   Table orderWith(Ordering ordering) => new Table.from(ordering.sorted(this));
 
-
-
   /**
    * A melt method similar to the R reshape package.
    * It reshapes the table into a long form, one row for all id variables and one
@@ -575,7 +589,8 @@ class Table extends Object with IterableMixin<Map>{
    */
   Table melt(List<String> id) {
     Table t = new Table();
-    List<String> variables = colnames.where((String name) => !id.contains(name)).toList();
+    List<String> variables =
+        colnames.where((String name) => !id.contains(name)).toList();
     int N = nrow;
     Table idTable = new Table();
     id.forEach((String name) => idTable.addColumn(this[name].data, name: name));
@@ -609,20 +624,21 @@ class Table extends Object with IterableMixin<Map>{
    * [{'code': 'BOS', 'Jan': 10, 'Feb': 20, 'Mar': 30},
    *  {'code': 'LAX', 'Jan': 40, 'Feb': null, 'Mar': null}].
    *```
-   * Missing values are filled with `null`s.
+   * Missing values are filled with `null`s by default, unless specified by
+   * the `fill` argument.
    */
   Table cast(List<String> vertical, List<String> horizontal, Function f,
-             {String variable: 'value', fill: null}) {
+      {String variable: 'value', fill: null}) {
     List _allGroups = new List.from(vertical)..addAll(horizontal);
 
     // group rows by
     Function _fg = (Map row) =>
-      new Map.fromIterables(_allGroups, _allGroups.map((g) => row[g]));
+        new Map.fromIterables(_allGroups, _allGroups.map((g) => row[g]));
     Map ind = _groupByIndex(this, _fg);
     int indValue = colnames.indexOf(variable);
 
     List res = [];
-    ind.forEach((k,List v) {
+    ind.forEach((k, List v) {
       Map row = {};
       vertical.forEach((name) => row[name] = k[name]);
 
@@ -635,11 +651,9 @@ class Table extends Object with IterableMixin<Map>{
     if (fill != null) _fillValue = fill;
     Table t = new Table.from(res, colnamesFromFirstRow: false);
 
-    if (fill != null) _fillValue = null;  // restore the default
+    if (fill != null) _fillValue = null; // restore the default
     return t;
   }
-
-
 
   /**
    * Remove the column with name [columnName] from the table.  Returns true if the
@@ -657,39 +671,32 @@ class Table extends Object with IterableMixin<Map>{
     return res;
   }
 
-
-
-
   /**
    * Remove the row with index [i].  Return true if successful, false if not possible.
    */
   bool removeRow(int i) {
     bool res = true;
-    if (i > nrow || i <0) {
+    if (i > nrow || i < 0) {
       res = false;
     } else {
-      for (int j=0; j<ncol; j++)
-        column(j).data.removeAt(i);
+      for (int j = 0; j < ncol; j++) column(j).data.removeAt(i);
     }
 
     return res;
   }
 
-
   String toString() {
-    List<List<String>>out = new List.generate(nrow+1, (i) => new List.filled(ncol, ''));
+    List<List<String>> out =
+        new List.generate(nrow + 1, (i) => new List.filled(ncol, ''));
     List<String> res = [];
-    for (int j=0; j<ncol; j++) {
+    for (int j = 0; j < ncol; j++) {
       var aux = column(j)._paddedOutput().toList();
-      for (int i=0; i<nrow+1; i++)
-        out[i][j] = aux[i];
+      for (int i = 0; i < nrow + 1; i++) out[i][j] = aux[i];
     }
-    for (int i=0; i<nrow+1; i++)
-      res.add(out[i].join(' '));
+    for (int i = 0; i < nrow + 1; i++) res.add(out[i].join(' '));
 
     return res.join('\n');
   }
-
 
   /**
    * Return the first [n] rows of this table as another table.
@@ -702,7 +709,7 @@ class Table extends Object with IterableMixin<Map>{
   Table sample({int n: 6}) {
     Random rand = new Random();
     List res = [];
-    for (int i=0; i<n; i++) {
+    for (int i = 0; i < n; i++) {
       res.add(row(rand.nextInt(nrow)));
     }
     return new Table.from(res);
@@ -715,16 +722,14 @@ class Table extends Object with IterableMixin<Map>{
   String _makeColumnName(int n) {
     String proposed = 'V${n}';
     if (colnames.contains(proposed)) {
-      proposed = _makeColumnName(n+1);
+      proposed = _makeColumnName(n + 1);
     }
 
     return proposed;
   }
-
 }
 
-
-class _TableIterator extends Iterator<Map>{
+class _TableIterator extends Iterator<Map> {
   Map _current;
   int ind;
   int nrow;
@@ -746,7 +751,6 @@ class _TableIterator extends Iterator<Map>{
 
     return res;
   }
+
   Map get current => _current;
 }
-
-
