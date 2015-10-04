@@ -447,8 +447,11 @@ class Table extends Object with IterableMixin<Map> {
   }
 
   /**
-   * Utility to group rows by a given function.  Each value of the resulting Map
-   * is a list of row indices.  It is a more memory efficient way to do the grouping.
+   * Utility to group rows by a given function.
+   * Each key of the resulting Map is the grouping value.
+   * Each value of the resulting Map is a list of row indices.
+   *
+   * It is a more memory efficient way to do the grouping.
    * Function [f] takes an element of the iterable and returns a grouping value.
    */
   Map _groupByIndex(Iterable x, Function f) {
@@ -469,7 +472,7 @@ class Table extends Object with IterableMixin<Map> {
   /**
    * Apply function [f] to different groups of rows.  Rows are grouped
    * by the distinct values of the columns indicated by [groupBy].
-   * Function [f] takes and [Iterable] and returns a single value.
+   * Function [f] takes an [Iterable] and returns a single value.
    *
    * For example to calculate the sum by the [groupBy] variables,
    * ```
@@ -499,6 +502,59 @@ class Table extends Object with IterableMixin<Map> {
 
     return new Table.from(res);
   }
+
+
+//  /**
+//   * Apply function [f] to different groups of rows.  Rows are grouped
+//   * by the distinct values of the columns indicated by [groupBy].
+//   *
+//   * In many usual cases only a simple aggregation of variables is needed.
+//   * The list of variables to aggregate will not be `null`.
+//   * The function [f] takes an Iterable corresponding to the values
+//   * of one variable for this grouping, and returns a single value.
+//   * For example to calculate the sum by the [groupBy] variables,
+//   * ```
+//   * Function f = (Iterable<num> x) => x.reduce((a,b) => a+b);
+//   * ```
+//   *
+//   * If during your aggregation, the function [f] needs to
+//   * access more than one variable, leave the [variables]
+//   * argument `null`.  The function [f] will then take the full row
+//   * as a `Map` input.  For example if a table has 3 columns
+//   * (Id, Min, Max) and you want to calculate the average range by Id
+//   * ```
+//   * Function f = (Map )
+//   * ```
+//   *
+//   *
+//   * If the function [f] returns multiple values
+//   *
+//   */
+//  Table groupApply2(List<String> groupBy, Function f, {List<String> variables, bool unwind: false}) {
+//    var by = groupBy.where((e) => colnames.contains(e)).toList();
+//    List vars = variables.where((e) => colnames.contains(e)).toList();
+//    Map _colIndex = new Map.fromIterables(
+//        colnames, new List.generate(colnames.length, (i) => i));
+//
+//    Map groups = _groupByIndex(
+//        this,
+//            (e) => new Map.fromIterables(
+//            by, new List.generate(by.length, (i) => e[by[i]])));
+//
+//    List res = [];
+//    groups.forEach((Map k, List ind) {
+//      Map row = new Map.from(k);
+//      vars.forEach((String variable) {
+//        var aux = ind.map((i) => _data[_colIndex[variable]].data[i]);
+//        row[variable] = f(aux);
+//      });
+//      res.add(row);
+//    });
+//
+//    return new Table.from(res);
+//  }
+
+
 
   /**
    * Apply function [f] on a list of [variables] to [width] observations
@@ -552,7 +608,6 @@ class Table extends Object with IterableMixin<Map> {
     keys.forEach((String name) {
       if (!colnames.contains(name)) throw 'Column name $name does not exist.';
       Ordering aux = new Ordering.natural();
-      aux = aux.onResultOf((Map row) => row[name]);
       if (orderBy[name] == -1) aux = aux.reverse();
       switch (nullOrdering) {
         case NullOrdering.FIRST:
@@ -562,6 +617,7 @@ class Table extends Object with IterableMixin<Map> {
           aux = aux.nullsLast();
           break;
       }
+      aux = aux.onResultOf((Map row) => row[name]);
       if (name == keys.first) {
         ord = aux;
       } else {
@@ -631,7 +687,7 @@ class Table extends Object with IterableMixin<Map> {
       {String variable: 'value', fill: null}) {
     List _allGroups = new List.from(vertical)..addAll(horizontal);
 
-    // group rows by
+    // group rows
     Function _fg = (Map row) =>
         new Map.fromIterables(_allGroups, _allGroups.map((g) => row[g]));
     Map ind = _groupByIndex(this, _fg);
@@ -654,6 +710,37 @@ class Table extends Object with IterableMixin<Map> {
     if (fill != null) _fillValue = null; // restore the default
     return t;
   }
+
+  /// use only one horizontal variable for pivoting. 
+  Table cast2(List<String> vertical, String horizontal, Function f,
+             {String variable: 'value', fill: null}) {
+    List _allGroups = new List.from(vertical);
+
+    // group rows
+    Function _fg = (Map row) =>
+    new Map.fromIterables(_allGroups, _allGroups.map((g) => row[g]));
+    Map ind = _groupByIndex(this, _fg);
+    int indValue = colnames.indexOf(variable);
+
+    List res = [];
+    ind.forEach((k, List v) {
+      Map row = {};
+      vertical.forEach((name) => row[name] = k[name]);
+
+      List newName = [];
+      horizontal.forEach((hName) => newName.add(k[hName]));
+      row[newName.join('_')] = f(v.map((e) => _data[indValue].data[e]));
+      res.add(row);
+    });
+
+    if (fill != null) _fillValue = fill;
+    Table t = new Table.from(res, colnamesFromFirstRow: false);
+
+    if (fill != null) _fillValue = null; // restore the default
+    return t;
+  }
+
+
 
   /**
    * Remove the column with name [columnName] from the table.  Returns true if the

@@ -87,11 +87,13 @@ you can do an inner join by the variable `code` like this
 Table tbl = t1.joinTable(t2, JOIN_TYPE.INNER_JOIN);
 ```
 to get 
-code | Tmin | Tmax
- BOS |  30  | 95
- LAX |  49  | 82
+|code | Tmin | Tmax |
+|-----|------|----- |
+| BOS |  30  | 95   |
+| LAX |  49  | 82   |
 
 #### Group apply
+
 You can split the table into groups according to several variables and then 
 apply a function to a variable from each individual groups.  For example, given 
 the table
@@ -108,11 +110,12 @@ Function sum = (Iterable<num> x) => x.reduce((a,b) => a+b);
 Table gT = t.groupApply(['farm', 'checked'], ['quantity'], sum);
 ```
 you calculate the total quantity by `farm` and `checked` variable to get
-farm checked quantity
-   A    true       30
-   A   false       30
-   B    true       50
-   B   false       25
+|farm | checked | quantity |
+|-----|---------|----------|
+|   A |   true  |     30   |
+|   A |  false  |     30   |
+|   B |   true  |     50   |
+|   B |  false  |     25   |
 
 The `groupApply` method is the equivalent of the SQL group by statement.
 

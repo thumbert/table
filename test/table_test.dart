@@ -265,7 +265,7 @@ table_simple() {
 
       // order with nulls
       Table t2 = t.order({'Tmax': -1});
-      print(t2);
+      expect(t2['Tmax'].data, [null, 100, 95, 95]);
     });
 
     test('joins by one column', () {
@@ -339,18 +339,29 @@ table_simple() {
 
     test('melt table', () {
       List rows = [
-        {'code': 'BOS', 'Tmin': 31, 'Tmax': 95},
+        {'code': 'BOS', 'Tmin': 34, 'Tmax': 95},
         {'code': 'BOS', 'Tmin': 30, 'Tmax': null},
         {'code': 'BWI', 'Tmin': 32, 'Tmax': 100}
       ];
       Table t = new Table.from(rows);
       Table tm = t.melt(['code']);
       expect(tm.nrow, 5);
+      expect(tm['value'].data, [34,30,32,95,100]);  // no nulls
     });
 
     test('cast table', () {
+      Table t = new Table.from([
+        {'code': 'BOS', 'variable': 'Tmin', 'value': 34},
+        {'code': 'BOS', 'variable': 'Tmin', 'value': 32},
+        {'code': 'BOS', 'variable': 'Tmax', 'value': 94},
+        {'code': 'BWI', 'variable': 'Tmin', 'value': 30},
+      ]);
+      Table tc = t.cast(['code'], ['variable'], (x) => x.length);
+      print(tc);
+      expect(tc.nrow, 2);
 
     });
+
 
 
     test('roll apply', () {
