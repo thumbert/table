@@ -356,7 +356,7 @@ table_simple() {
         {'code': 'BOS', 'variable': 'Tmax', 'value': 94},
         {'code': 'BWI', 'variable': 'Tmin', 'value': 30},
       ]);
-      Table tc = t.cast(['code'], ['variable'], (x) => x.length);
+      Table tc = t.cast2(['code'], ['variable'], (x) => x.length);
       print(tc);
       expect(tc.nrow, 2);
 

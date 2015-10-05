@@ -667,6 +667,8 @@ class Table extends Object with IterableMixin<Map> {
    * variables that will remain along the rows.  The variables in the [horizontal]
    * list will be transposed and the unique values will become columns.
    *
+   * Function [f] takes an `Iterable` and returns a value.
+   *
    * For example, to pivot this 4 rows and 3 columns table
    * ```
    * [{'code': 'BOS', 'month': 'Jan', 'value': 10},
@@ -711,27 +713,25 @@ class Table extends Object with IterableMixin<Map> {
     return t;
   }
 
-  /// use only one horizontal variable for pivoting. 
-  Table cast2(List<String> vertical, String horizontal, Function f,
+  /// fix it.
+  Table cast2(List<String> vertical, List<String> horizontal, Function f,
              {String variable: 'value', fill: null}) {
-    List _allGroups = new List.from(vertical);
 
-    // group rows
-    Function _fg = (Map row) =>
-    new Map.fromIterables(_allGroups, _allGroups.map((g) => row[g]));
-    Map ind = _groupByIndex(this, _fg);
-    int indValue = colnames.indexOf(variable);
+    // collapse into unique groups
+    Table tbl = groupApply(vertical..addAll(horizontal), [variable], f);
+
+    // and now pivot it
+    int indValue = tbl.colnames.indexOf(variable);
+
 
     List res = [];
-    ind.forEach((k, List v) {
-      Map row = {};
-      vertical.forEach((name) => row[name] = k[name]);
+    tbl.forEach((Map row) {
 
-      List newName = [];
-      horizontal.forEach((hName) => newName.add(k[hName]));
-      row[newName.join('_')] = f(v.map((e) => _data[indValue].data[e]));
-      res.add(row);
     });
+//      horizontal.forEach((hName) => newName.add(k[hName]));
+//      row[newName.join('_')] = f(v.map((e) => _data[indValue].data[e]));
+//      res.add(row);
+//    });
 
     if (fill != null) _fillValue = fill;
     Table t = new Table.from(res, colnamesFromFirstRow: false);
