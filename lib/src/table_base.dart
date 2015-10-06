@@ -686,23 +686,45 @@ class Table extends Object with IterableMixin<Map> {
    * the `fill` argument.
    */
   Table cast(List<String> vertical, List<String> horizontal, Function f,
-      {String variable: 'value', fill: null}) {
-    List _allGroups = new List.from(vertical)..addAll(horizontal);
+              {String variable: 'value', fill: null}) {
+
+    List<String> grp = new List.from(vertical)..addAll(horizontal);
+    // collapse into unique groups
+    Table tbl = groupApply(grp, [variable], f);
+
+    // and now pivot it
+    return tbl._pivot(vertical, horizontal, variable: variable, fill: fill);
+  }
+
+
+
+  /// Just pivot the table, no aggregation done.
+  Table _pivot(List<String> vertical, List<String> horizontal,
+               {String variable: 'value', fill: null}) {
 
     // group rows
     Function _fg = (Map row) =>
-        new Map.fromIterables(_allGroups, _allGroups.map((g) => row[g]));
-    Map ind = _groupByIndex(this, _fg);
+      new Map.fromIterables(vertical, vertical.map((g) => row[g]));
+    Map<String, List<int>> ind = _groupByIndex(this, _fg);
     int indValue = colnames.indexOf(variable);
+
+    // the horizontal columns may need to be joined
+    List<String> horizontalVals = [];
+    if (horizontal.length == 1) {
+      horizontalVals = this[horizontal.first].data;
+    } else {
+      this.forEach((row) {
+        String str = horizontal.map((name) => row[name]).join('_');
+        horizontalVals.add(str);
+      });
+    }
 
     List res = [];
     ind.forEach((k, List v) {
       Map row = {};
       vertical.forEach((name) => row[name] = k[name]);
 
-      List newName = [];
-      horizontal.forEach((hName) => newName.add(k[hName]));
-      row[newName.join('_')] = f(v.map((e) => _data[indValue].data[e]));
+      v.forEach((int i) => row[horizontalVals[i]] = this.column(indValue)[i]);
       res.add(row);
     });
 
@@ -713,32 +735,6 @@ class Table extends Object with IterableMixin<Map> {
     return t;
   }
 
-  /// fix it.
-  Table cast2(List<String> vertical, List<String> horizontal, Function f,
-             {String variable: 'value', fill: null}) {
-
-    // collapse into unique groups
-    Table tbl = groupApply(vertical..addAll(horizontal), [variable], f);
-
-    // and now pivot it
-    int indValue = tbl.colnames.indexOf(variable);
-
-
-    List res = [];
-    tbl.forEach((Map row) {
-
-    });
-//      horizontal.forEach((hName) => newName.add(k[hName]));
-//      row[newName.join('_')] = f(v.map((e) => _data[indValue].data[e]));
-//      res.add(row);
-//    });
-
-    if (fill != null) _fillValue = fill;
-    Table t = new Table.from(res, colnamesFromFirstRow: false);
-
-    if (fill != null) _fillValue = null; // restore the default
-    return t;
-  }
 
 
 
