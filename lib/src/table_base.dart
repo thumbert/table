@@ -711,7 +711,7 @@ class Table extends Object with IterableMixin<Map> {
     return t;
   }
 
-  /// use only one horizontal variable for pivoting. 
+  /// use only one horizontal variable for pivoting.
   Table cast2(List<String> vertical, String horizontal, Function f,
              {String variable: 'value', fill: null}) {
     List _allGroups = new List.from(vertical);
