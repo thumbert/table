@@ -87,6 +87,7 @@ you can do an inner join by the variable `code` like this
 Table tbl = t1.joinTable(t2, JOIN_TYPE.INNER_JOIN);
 ```
 to get 
+
 | code  | Tmin   | Tmax  |
 | ----- | ------ | ----- |
 | BOS   |  30    | 95    |
@@ -110,6 +111,7 @@ Function sum = (Iterable<num> x) => x.reduce((a,b) => a+b);
 Table gT = t.groupApply(['farm', 'checked'], ['quantity'], sum);
 ```
 you calculate the total quantity by `farm` and `checked` variable to get
+
 | farm | checked | quantity |
 | ---- | ------- | -------- |
 | A    | true    | 30       |
