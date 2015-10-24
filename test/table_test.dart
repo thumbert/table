@@ -357,12 +357,22 @@ table_simple() {
         {'code': 'BWI', 'variable': 'Tmin', 'value': 30},
       ]);
       Table tc = t.cast(['code'], ['variable'], (x) => x.length);
-      print(tc);
       expect(tc.nrow, 2);
-
+      expect(tc['Tmax'].data, [1, null]);
     });
 
-
+    test('cast table with 2 horizontal variables', () {
+      Table t = new Table.from([
+        {'code': 'BOS', 'variable': 'Tmin', 'id': 'A', 'value': 34},
+        {'code': 'BOS', 'variable': 'Tmin', 'id': 'A', 'value': 32},
+        {'code': 'BOS', 'variable': 'Tmax', 'id': 'B', 'value': 94},
+        {'code': 'BWI', 'variable': 'Tmin', 'id': 'B', 'value': 30},
+      ]);
+      Table tc = t.cast(['code'], ['id', 'variable'],
+          (x) => x.length, fill: 0);
+      expect(tc.nrow, 2);
+      expect(tc['A_Tmin'].data, [2, 0]);
+    });
 
     test('roll apply', () {
       DateTime startDt = new DateTime(2015);
