@@ -7,66 +7,31 @@ library nest;
 ///   'foo2': {'bar1': v21, 'bar2': v22, ...}
 /// }
 /// Return the flattened map as a List of Maps.
-/// [{'foo': 'foo1', 'bar1': v11},
-///  {'foo': 'foo1', 'bar2': v12},
-///  {'foo': 'foo2', 'bar1': v21},
-///  {'foo': 'foo2', 'bar2': v22}, ...]
+/// [{'level0': 'foo1', 'level1': 'bar1', 'value': v11},
+///  {'level0': 'foo1', 'level1': 'bar2', 'value': v12},
+///  {'level0': 'foo2', 'level1': 'bar1', 'value': v21},
+///  {'level0': 'foo2', 'level1': 'bar2', 'value': v22},
+///  ...]
 ///
 List<Map> flattenMap(Map m, {List<String> levelNames}) {
   levelNames ??= [];
-  return _flattenLevel([], m, 0, levelNames: levelNames)
-      .toList(growable: false);
+  return _flatten(m, 0).toList();
 }
 
-List _flattenLevel(List out, Map x, int level, {List<String> levelNames}) {
-  if (levelNames.isEmpty || levelNames.length < level + 1) {
-    levelNames.add('level$level');
-  }
-  String name = levelNames[level];
-
-  x.keys.forEach((k) {
-    if (level == 0) {
-      out.add({name: k});
-    } else {
-      out = out.map((Map e) {
-        e[name] = k;
+List _flatten(Map m, int level) {
+  List out;
+  m.forEach((k, v) {
+    if (v is Map) {
+      out ??= [];
+      List aux = _flatten(v, level + 1);
+      out.addAll(aux.map((Map e) {
+        e['level$level'] = k;
         return e;
-      }).toList();
-    }
-
-    if (x[k] is Map) {
-      out = _flattenLevel(out, x[k], level + 1, levelNames: levelNames);
+      }));
     } else {
-      out = out.map((e) {
-        e['value'] = x[k];
-        return e;
-      }).toList();
-      /// row is done, add to out
-      out.add(row);
+      out ??= [];
+      out.add({'value': v, 'level$level': k});
     }
   });
-
-  return out.toList();
-}
-
-/// WRONG
-dynamic _flattenLevel2(dynamic x, int level, {List<String> levelNames}) {
-  List<Map> res = [];
-
-  /// keep flattening
-  if (levelNames.isEmpty || levelNames.length < level + 1) {
-    levelNames.add('level$level');
-  }
-  if (x is Map) {
-    x.keys.forEach((k) {
-      print('level: $level, name: ${levelNames[level]}, key: $k');
-      print('x[k]: ${x[k]}');
-      Map aux = _flattenLevel(x[k], level + 1, levelNames: levelNames);
-      res.add({levelNames[level]: k}..addAll(aux));
-    });
-  } else {
-    res.add({levelNames[level]: x});
-  }
-
-  return res;
+  return out;
 }
