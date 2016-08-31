@@ -3,6 +3,7 @@ library test.collections.flattenmap;
 import 'package:test/test.dart';
 import 'package:table/src/flattenMap.dart';
 
+
 test1() {
   Map data = {'A': 10, 'B': 20, 'C': 30};
   List res = flattenMap(data);
@@ -64,8 +65,60 @@ test3() {
 
 }
 
+test3Names() {
+  Map data = {
+    'A1': {
+      'B1': {'C1': 1, 'C2': 2},
+      'B2': {'C1': 3, 'C2': 4}
+    },
+    'A2': {
+      'B1': {'C1': 5, 'C2': 6},
+      'B2': {'C1': 7, 'C2': 8}
+    },
+  };
+  List res = flattenMap(data, levelNames: ['levelA', 'levelB', 'levelC']);
+  //res.forEach(print);
+  test('flattenMap, three nesting levels with names', () {
+    expect(res, [
+      {'value': 1, 'levelC': 'C1', 'levelB': 'B1', 'levelA': 'A1'},
+      {'value': 2, 'levelC': 'C2', 'levelB': 'B1', 'levelA': 'A1'},
+      {'value': 3, 'levelC': 'C1', 'levelB': 'B2', 'levelA': 'A1'},
+      {'value': 4, 'levelC': 'C2', 'levelB': 'B2', 'levelA': 'A1'},
+      {'value': 5, 'levelC': 'C1', 'levelB': 'B1', 'levelA': 'A2'},
+      {'value': 6, 'levelC': 'C2', 'levelB': 'B1', 'levelA': 'A2'},
+      {'value': 7, 'levelC': 'C1', 'levelB': 'B2', 'levelA': 'A2'},
+      {'value': 8, 'levelC': 'C2', 'levelB': 'B2', 'levelA': 'A2'},
+    ]);
+  });
+}
+
+test2Names() {
+  Map data = {
+    'B1': {'Jan15': 1, 'Feb15': 2},
+    'B2': {'Jan15': 3, 'Feb15': 4},
+    'B3': {'Jan15': 5, 'Feb15': 6}
+  };
+  List res = flattenMap(data, levelNames: ['levelB', 'month', 'count']);
+  //res.forEach(print);
+  test('flattenMap, two nesting levels with names', () {
+    expect(res, [
+      {'levelB': 'B1', 'month': 'Jan15', 'count': 1},
+      {'levelB': 'B1', 'month': 'Feb15', 'count': 2},
+      {'levelB': 'B2', 'month': 'Jan15', 'count': 3},
+      {'levelB': 'B2', 'month': 'Feb15', 'count': 4},
+      {'levelB': 'B3', 'month': 'Jan15', 'count': 5},
+      {'levelB': 'B3', 'month': 'Feb15', 'count': 6},
+    ]);
+  });
+}
+
 main() {
   test1();
   test2();
   test3();
+  test2Names();
+  test3Names();
+
 }
+
+

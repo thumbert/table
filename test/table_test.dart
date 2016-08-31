@@ -398,7 +398,7 @@ speed_test() {
   print(t.head());
 
   Function mean = (Iterable x) => x.reduce((a, b) => a + b) / x.length;
-  Table agg = t.groupApply(['id'], ['value'], mean);
+  Table agg = t.groupApply(mean, groupBy: ['id'], variables: ['value']);
   print(agg.head());
   print(agg.sample());
 }

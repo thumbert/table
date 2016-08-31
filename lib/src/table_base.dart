@@ -701,7 +701,7 @@ class Table extends Object with IterableMixin<Map> {
 
     List<String> grp = new List.from(vertical)..addAll(horizontal);
     /// collapse into unique groups first
-    Table tbl = groupApply(grp, [variable], f);
+    Table tbl = groupApply(f, groupBy: grp, variables: [variable]);
 
     /// and now pivot it
     return tbl._pivot(vertical, horizontal, variable: variable, fill: fill);
