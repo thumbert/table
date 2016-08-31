@@ -22,12 +22,11 @@ stabilize this message will disappear.
 
 ### Terminology
 
-A table is composed of variables arranged in columns.  I will interchangeably
-use the terms column and variable.  Each row of a table is said to form an observation
+A table is composed of variables arranged in columns.  This document will interchangeably
+mix the terms column and variable.  Each row of a table is said to form an observation,
 also referred to as a record.  Conceptually, variables can be categorical/grouping/id
 variables or measurement variables.  Missing variable values are encoded with
-`null`s.  (No, `null` is not his last name,  somehow the value of his last name
-did not get recorded.)
+`null`'s.  (No, `null` is not his last name,  we just don't know his last name.)
 
 ### Examples
 Create a table with two columns
@@ -87,10 +86,11 @@ you can do an inner join by the variable `code` like this
 Table tbl = t1.joinTable(t2, JOIN_TYPE.INNER_JOIN);
 ```
 to get 
-|code | Tmin | Tmax |
-|-----|------|----- |
-| BOS |  30  | 95   |
-| LAX |  49  | 82   |
+
+| code  | Tmin   | Tmax  |
+| ----- | ------ | ----- |
+| BOS   |  30    | 95    |
+| LAX   |  49    | 82    |
 
 #### Group apply
 
@@ -110,20 +110,46 @@ Function sum = (Iterable<num> x) => x.reduce((a,b) => a+b);
 Table gT = t.groupApply(['farm', 'checked'], ['quantity'], sum);
 ```
 you calculate the total quantity by `farm` and `checked` variable to get
-|farm | checked | quantity |
-|-----|---------|----------|
-|   A |   true  |     30   |
-|   A |  false  |     30   |
-|   B |   true  |     50   |
-|   B |  false  |     25   |
+
+| farm | checked | quantity |
+| ---- | ------- | -------- |
+| A    | true    | 30       |
+| A    | false   | 30       |
+| B    | true    | 50       |
+| B    |false    | 25       |
 
 The `groupApply` method is the equivalent of the SQL group by statement.
 
  
 #### Reshape (melt and cast) 
 As in the `R`'s [reshape](http://had.co.nz/reshape/) package, there are 
-two methods `melt` and `cast` to allow for reshaping the table. 
+two methods `melt` and `cast` to allow for reshaping a table. 
 
+See the `test` directory for additional examples. 
+
+For example, given this table `t`  
+
+| code | variable | id | value |
+| ---- | -------- | -- | ----- |
+| BOS  | Tmin     | A  | 34    |
+| BOS  | Tmin     | A  | 32    |
+| BOS  | Tmax     | B  | 94    | 
+| BWI  | Tmin     | B  | 30    |
+ 
+to calculate the number of observations with variable `code` 
+on the vertical and variables `id` and `variable` on the horizontal you do  
+```dart
+      Table tc = t.cast(['code'], ['id', 'variable'],
+          (x) => x.length, fill: 0);
+```
+
+| code | A_Tmin | B_Tmax | B_Tmin |
+| ---- | ------ | ------ | ------ |
+| BOS  | 2      | 1      | 0      |
+| BWI  | 0      | 0      | 1      |
+
+Note how zeros are added for the missing combinations and the names of the new columns 
+get created by concatenating the joint groups. 
 
 
 

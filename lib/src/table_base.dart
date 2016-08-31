@@ -674,11 +674,11 @@ class Table extends Object with IterableMixin<Map> {
   }
 
   /**
-   * Reshape (pivot) a table in the 'long' form.  The [vertical] list indicates the
+   * Reshape (pivot) a table (with a summary function).  The [vertical] list indicates the
    * variables that will remain along the rows.  The variables in the [horizontal]
    * list will be transposed and the unique values will become columns.
    *
-   * Function [f] takes an `Iterable` and returns a value.
+   * The summary function [f] takes an `Iterable` and returns a value.
    *
    * For example, to pivot this 4 rows and 3 columns table
    * ```
@@ -700,10 +700,10 @@ class Table extends Object with IterableMixin<Map> {
               {String variable: 'value', fill: null}) {
 
     List<String> grp = new List.from(vertical)..addAll(horizontal);
-    // collapse into unique groups
+    /// collapse into unique groups first
     Table tbl = groupApply(grp, [variable], f);
 
-    // and now pivot it
+    /// and now pivot it
     return tbl._pivot(vertical, horizontal, variable: variable, fill: fill);
   }
 

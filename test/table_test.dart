@@ -370,6 +370,7 @@ table_simple() {
       ]);
       Table tc = t.cast(['code'], ['id', 'variable'],
           (x) => x.length, fill: 0);
+      print(t);
       expect(tc.nrow, 2);
       expect(tc['A_Tmin'].data, [2, 0]);
     });
