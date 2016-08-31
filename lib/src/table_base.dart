@@ -221,8 +221,8 @@ class Table extends Object with IterableMixin<Map> {
   }
 
   /**
-   * Apply function [f] to each column (possibly to a subset of columns specified by
-   * [columnNames], by certain groups specified by [byColumnNames]),
+   * Apply function [f] to each column (or possibly to a subset of columns
+   * as specified by [columnNames]).
    */
   Table columnApply(Function f, {List<String> variableNames}) {
     if (variableNames == null) variableNames = _colnames;
@@ -453,6 +453,7 @@ class Table extends Object with IterableMixin<Map> {
    *
    * It is a more memory efficient way to do the grouping.
    * Function [f] takes an element of the iterable and returns a grouping value.
+   * In this case the Iterable x is the actual table.
    */
   Map _groupByIndex(Iterable x, Function f) {
     Map result = new LinkedHashMap(
@@ -461,8 +462,8 @@ class Table extends Object with IterableMixin<Map> {
         hashCode: (e) => _rowEquality.hash(e));
 
     int ind = 0;
-    x.forEach((v) {
-      result.putIfAbsent(f(v), () => []).add(ind);
+    x.forEach((Map row) {
+      result.putIfAbsent(f(row), () => []).add(ind);
       ind += 1;
     });
 
@@ -472,33 +473,43 @@ class Table extends Object with IterableMixin<Map> {
   /**
    * Apply function [f] to different groups of rows.  Rows are grouped
    * by the distinct values of the columns indicated by [groupBy].
-   * Function [f] takes an [Iterable] and returns a single value.
+   * If [groupBy] is not specified, the function [f] is applied to
+   * each individual row.
+   *
+   * Function [f] takes an [Iterable] and returns a Map with String keys.
+   * The Map returned by [f] will be used to construct the [Table] returned.
    *
    * For example to calculate the sum by the [groupBy] variables,
    * ```
-   * Function f = (Iterable<num> x) => x.reduce((a,b) => a+b);
+   * Function f = (Iterable<num> x) => x.reduce((a,b) => {'sum': a+b});
    * ```
    */
-  Table groupApply(List<String> groupBy, List<String> variables, Function f) {
+  Table groupApply(Function f, {List<String> groupBy, List<String> variables}) {
     var by = groupBy.where((e) => colnames.contains(e)).toList();
     List vars = variables.where((e) => colnames.contains(e)).toList();
     Map _colIndex = new Map.fromIterables(
         colnames, new List.generate(colnames.length, (i) => i));
-
-    Map groups = _groupByIndex(
-        this,
-        (e) => new Map.fromIterables(
-            by, new List.generate(by.length, (i) => e[by[i]])));
-
     List res = [];
-    groups.forEach((Map k, List ind) {
-      Map row = new Map.from(k);
-      vars.forEach((String variable) {
-        var aux = ind.map((i) => _data[_colIndex[variable]].data[i]);
-        row[variable] = f(aux);
+
+    if (groupBy == null) {
+      this.forEach((Map row) {
+        res.add(f(row));
       });
-      res.add(row);
-    });
+    } else {
+      Map<Map,List<int>> groups = _groupByIndex(
+          this,
+              (e) => new Map.fromIterables(
+              by, new List.generate(by.length, (i) => e[by[i]])));
+
+      groups.forEach((Map k, List ind) {
+        Map row = new Map.from(k);
+        vars.forEach((String variable) {
+          var aux = ind.map((i) => _data[_colIndex[variable]].data[i]);
+          row[variable] = f(aux);
+        });
+        res.add(row);
+      });
+    }
 
     return new Table.from(res);
   }
