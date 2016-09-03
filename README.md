@@ -35,11 +35,12 @@ Table t = new Table()
   ..addColumn(['BWI', 'BWI', 'BOS'], name: 'code')
   ..addColumn([31, 30, 33], name: 'Tmin');
 ```
-The table has `t.nrow` rows and `t.ncol` columns.  The columns have names `t.colnames`.
+The table has `t.nrow` rows and `t.ncol` columns.  You can set or get the column names 
+using `t.colnames`.
 
 You can add additional rows of data with `t.addRow({'code': 'LAX', 'Tmin': 45})`.
 
-A table can also be created directly from an iterable of rows
+A table can also be created directly from an iterable of rows.
 ```dart
 Table t1 = new Table.from([
         {'code': 'BOS', 'Tmin': 30},
@@ -48,7 +49,7 @@ Table t1 = new Table.from([
       ]);
 ```
 
-You can extract the column of a table by direct subset of the table `t['code']`.
+You can extract the column of a table by a direct subset of the table `t['code']`.
 
 `Table` extends `IterableMixin` so for example you can filter rows as any other iterable
  ```t.where((Map row) => row['Tmin'] > 33)```
