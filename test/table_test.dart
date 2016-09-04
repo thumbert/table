@@ -312,11 +312,11 @@ table_simple() {
         {'code': 'BWI', 'month': 'Feb', 'day': 2, 'Tmin': 37, 'Tmax': 50}
       ]);
 
-      var gT1 = t.groupApply(['month'], ['Tmin', 'Tmax'], (x) => x.length);
+      var gT1 = t.groupApply((x) => x.length, groupBy: ['month'], variables: ['Tmin', 'Tmax']);
       expect(gT1['Tmin'].data, [4,4]);
       expect(gT1['Tmax'].data, [4,4]);
 
-      var gT2 = t.groupApply(['month', 'code'], ['Tmin', 'Tmax'], (x) => x.length);
+      var gT2 = t.groupApply((x) => x.length, groupBy: ['month', 'code'], variables: ['Tmin', 'Tmax']);
       expect(gT2['Tmin'].data, [2,2,2,2]);
       expect(gT2['Tmax'].data, [2,2,2,2]);
     });
@@ -331,7 +331,7 @@ table_simple() {
         {'farm': 'B', 'checked': true, 'meatType': 'beef', 'quantity': 35}
       ]);
       Function sum = (Iterable<num> x) => x.reduce((a,b) => a+b);
-      Table gT = t.groupApply(['farm', 'checked'], ['quantity'], sum);
+      Table gT = t.groupApply(sum, groupBy: ['farm', 'checked'], variables: ['quantity']);
       expect(gT['farm'].data, ['A', 'A', 'B', 'B']);
       expect(gT['checked'].data, [true, false, true, false]);
       expect(gT['quantity'].data, [30, 30, 50, 25]);
@@ -370,7 +370,7 @@ table_simple() {
       ]);
       Table tc = t.cast(['code'], ['id', 'variable'],
           (x) => x.length, fill: 0);
-      print(t);
+      //print(tc);
       expect(tc.nrow, 2);
       expect(tc['A_Tmin'].data, [2, 0]);
     });

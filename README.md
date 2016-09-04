@@ -28,6 +28,7 @@ also referred to as a record.  Conceptually, variables can be categorical/groupi
 variables or measurement variables.  Missing variable values are encoded with
 `null`'s.  (No, `null` is not his last name,  we just don't know his last name.)
 
+
 ### Examples
 Create a table with two columns
 ```dart
@@ -67,7 +68,7 @@ where column `code` is sorted ascendingly and column `Tmin` is sorted descending
 You can column bind `cbind` two tables with the same number of rows.  You can
 row bind `rbind` two tables with the same column names.
 
-#### Joins
+#### Joins 
 Tables can be joined in the SQL sense on columns that have the same name.  For example, 
 given the two tables 
 ```dart
@@ -117,7 +118,7 @@ you calculate the total quantity by `farm` and `checked` variable to get
 | A    | true    | 30       |
 | A    | false   | 30       |
 | B    | true    | 50       |
-| B    |false    | 25       |
+| B    | false   | 25       |
 
 The `groupApply` method is the equivalent of the SQL group by statement.
 
@@ -131,11 +132,12 @@ See the `test` directory for additional examples.
 For example, given this table `t`  
 
 | code | variable | id | value |
-| ---- | -------- | -- | ----- |
-| BOS  | Tmin     | A  | 34    |
-| BOS  | Tmin     | A  | 32    |
-| BOS  | Tmax     | B  | 94    | 
-| BWI  | Tmin     | B  | 30    |
+| ---- | ------- | -------- | ---- |
+| BOS    | Tmin    | A       | 34 |
+| BOS    | Tmin    | A       | 34 |
+| BOS    | Tmax    | B       | 94 |
+| BOS    | Tmin    | B       | 30 |
+
  
 to calculate the number of observations with variable `code` 
 on the vertical and variables `id` and `variable` on the horizontal you do  
