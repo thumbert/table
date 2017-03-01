@@ -4,5 +4,6 @@
 /// The table library.
 library table;
 
+export 'src/flattenMap.dart';
 export 'src/nest.dart';
 export 'src/table_base.dart';
