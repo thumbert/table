@@ -1,4 +1,4 @@
-library nest;
+library flatten_map;
 
 
 /// Take a nested map [m] and return a one-level new map.

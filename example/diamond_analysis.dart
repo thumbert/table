@@ -16,7 +16,8 @@ import 'package:table/table.dart';
  * Return a table.
  */
 Future<Table> loadData() async {
-  String url = "https://vincentarelbundock.github.io/Rdatasets/csv/Ecdat/Diamond.csv";
+  String url =
+      "https://vincentarelbundock.github.io/Rdatasets/csv/Ecdat/Diamond.csv";
   HttpClientRequest request = await new HttpClient().getUrl(Uri.parse(url));
   HttpClientResponse response = await request.close();
   String res = await response.transform(UTF8.decoder).join();
@@ -29,25 +30,21 @@ Future<Table> loadData() async {
   return new Table.from(rows);
 }
 
-dataAnalysis(Table data){
-  print('\ncount of diamonds per clarity');
-  Table c = data.groupApply(['clarity'], ['clarity'], (x) => x.length);
+dataAnalysis(Table data) {
+  print('\ncount of diamonds by clarity');
+  Table c = data.groupApply((x) => x.length,
+      groupBy: ['clarity'], variables: ['clarity']);
   print(c);
 
   print('\ncount of clarity vs. color');
   Table cc = data.cast(['clarity'], ['color'], (x) => x.length, fill: 0);
   print(cc);
-
-
 }
 
-
 main() async {
-
   Table data = await loadData();
   print(data.head());
   print('number of rows: ${data.nrow}');
 
   dataAnalysis(data);
-
 }

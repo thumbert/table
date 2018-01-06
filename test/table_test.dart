@@ -3,8 +3,7 @@
 
 library table.test;
 
-import 'package:more/ordering.dart';
-
+import 'dart:async';
 import 'package:test/test.dart';
 import 'package:table/table.dart';
 
@@ -142,7 +141,7 @@ table_simple() {
     test('adding a column with existing name throws', () {
       List rows = [{'code': 'BOS', 'value': 2}, {'code': 'BOS', 'value': 4}];
       Table t = new Table.from(rows);
-      expect(() => t.addColumn([10, 15], name: 'value'), throws);
+      expect(() => t.addColumn([10, 15], name: 'value'), throwsArgumentError);
     });
 
     test('remove columns', () {

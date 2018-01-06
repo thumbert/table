@@ -4,7 +4,7 @@ library nest;
 /// Implement a nest construct as in D3
 class Nest {
   List<Function> _keys = [];
-  List _sortKeys = [];
+  //List _sortKeys = [];
   Function _rollup;
 
   Nest();
