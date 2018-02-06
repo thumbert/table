@@ -112,13 +112,77 @@ test2Names() {
   });
 }
 
+extractValuesTest() {
+  group('extract nested map', () {
+    test('level 1 map', () {
+      Map m1 = {
+        'A1': [1],
+        'B1': [2]
+      };
+      var res = ldz.extractValues(m1);
+      expect(res, [
+        [1],
+        [2]
+      ]);
+    });
+    test('level 2 map', () {
+      Map m1 = {
+        'A': {
+          'AA': [1, 2],
+          'AB': [3, 4],
+        },
+        'B': {
+          'BA': [5, 6],
+          'BB': [7, 8],
+        }
+      };
+      var res = ldz.extractValues(m1);
+      expect(res, [
+        [1, 2],
+        [3, 4],
+        [5, 6],
+        [7, 8],
+      ]);
+    });
+    test('level 3 map', () {
+      Map m1 = {
+        'A': {
+          'AA': {
+            'AAA': [1, 2],
+            'AAB': [11, 22],
+        },
+          'AB': {
+            'ABA': [3, 4],
+            'ABB': [33, 44],
+          },
+        },
+        'B': {
+          'BA': [5, 6],
+          'BB': [7, 8],
+        }
+      };
+      var res = ldz.extractValues(m1);
+      expect(res, [
+        [1, 2],
+        [11, 22],
+        [3, 4],
+        [33, 44],
+        [5, 6],
+        [7, 8],
+      ]);
+    });
+  });
+}
+
+
+
 main() {
   test1();
   test2();
   test3();
   test2Names();
   test3Names();
-
+  extractValuesTest();
 }
 
 
