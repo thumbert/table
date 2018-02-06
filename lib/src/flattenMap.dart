@@ -1,5 +1,20 @@
 library flatten_map;
 
+/// Given a multiple level nested Map, extract the values of the last level.
+/// This function is useful to extract the results of a nest computation. 
+List extractValues(Map x) {
+  List out = [];
+  if (x.values.first is List) {
+    out.addAll(x.values);
+  } else {
+    x.forEach((k,v) {
+      out.addAll(extractValues(v));
+    });
+  }
+  return out;
+}
+
+
 
 /// Take a nested map [m] and return a one-level new map.
 /// For example given the input map:
