@@ -119,7 +119,7 @@ extractValuesTest() {
         'A1': [1],
         'B1': [2]
       };
-      var res = ldz.extractValues(m1);
+      var res = extractValues(m1);
       expect(res, [
         [1],
         [2]
@@ -136,7 +136,7 @@ extractValuesTest() {
           'BB': [7, 8],
         }
       };
-      var res = ldz.extractValues(m1);
+      var res = extractValues(m1);
       expect(res, [
         [1, 2],
         [3, 4],
@@ -161,7 +161,7 @@ extractValuesTest() {
           'BB': [7, 8],
         }
       };
-      var res = ldz.extractValues(m1);
+      var res = extractValues(m1);
       expect(res, [
         [1, 2],
         [11, 22],
