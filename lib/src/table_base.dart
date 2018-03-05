@@ -4,6 +4,7 @@ import 'dart:collection';
 import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:more/ordering.dart';
+import 'package:csv/csv.dart';
 
 enum JOIN_TYPE { OUTER_JOIN, LEFT_JOIN, RIGHT_JOIN, INNER_JOIN }
 
@@ -742,10 +743,8 @@ class Table extends Object with IterableMixin<Map> {
     return t;
   }
 
-  /**
-   * Remove the column with name [columnName] from the table.  Returns true if the
-   * [columnName] was a column name, false otherwise.
-   */
+  /// Remove the column with name [columnName] from the table.  Returns true
+  /// if the [columnName] was a column name, false otherwise.
   bool removeColumn(String columnName) {
     bool res = false;
     int ind = _colnames.indexOf(columnName);
@@ -758,9 +757,7 @@ class Table extends Object with IterableMixin<Map> {
     return res;
   }
 
-  /**
-   * Remove the row with index [i].  Return true if successful, false if not possible.
-   */
+  /// Remove the row with index [i].  Return true if successful, false if not.
   bool removeRow(int i) {
     bool res = true;
     if (i > nrow || i < 0) {
@@ -768,10 +765,23 @@ class Table extends Object with IterableMixin<Map> {
     } else {
       for (int j = 0; j < ncol; j++) column(j).data.removeAt(i);
     }
-
     return res;
   }
 
+  /// Output the table as a CSV string.
+  String toCsv() {
+    List<List> rows = new List.generate(nrow+1, (i) => []);
+    rows[0] = new List.from(colnames);
+    for (int j = 0; j < ncol; j++) {
+      var cj = column(j);
+      for (int i = 0; i < nrow; i++) {
+        rows[i+1].add(cj[i]);
+      }
+    }
+    return const ListToCsvConverter().convert(rows);
+  }
+
+  /// Column aligned toString output.
   String toString() {
     List<List<String>> out =
         new List.generate(nrow + 1, (i) => new List.filled(ncol, ''));
@@ -781,18 +791,13 @@ class Table extends Object with IterableMixin<Map> {
       for (int i = 0; i < nrow + 1; i++) out[i][j] = aux[i];
     }
     for (int i = 0; i < nrow + 1; i++) res.add(out[i].join(' '));
-
     return res.join('\n');
   }
 
-  /**
-   * Return the first [n] rows of this table as another table.
-   */
+  /// Return the first [n] rows of this table as another table.
   Table head({int n: 6}) => new Table.from(this.take(n));
 
-  /**
-   * Sample [n] rows from this table and return it as another table.
-   */
+  /// Sample [n] rows from this table and return it as another table.
   Table sample({int n: 6}) {
     Random rand = new Random();
     List res = [];
@@ -802,10 +807,8 @@ class Table extends Object with IterableMixin<Map> {
     return new Table.from(res);
   }
 
-  /**
-   * Make unique column name (in case there are collisions.)  The name is in the form
-   * 'V{number}'.
-   */
+  /// Make unique column name (in case there are collisions.)  The name is
+  /// in the form 'V{number}'.
   String _makeColumnName(int n) {
     String proposed = 'V${n}';
     if (colnames.contains(proposed)) {

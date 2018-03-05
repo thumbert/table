@@ -47,7 +47,10 @@ table_simple() {
     });
 
     test('construct table from row iterator', () {
-      List rows = [{'code': 'BOS', 'value': 2}, {'code': 'BOS', 'value': 4}];
+      List rows = [
+        {'code': 'BOS', 'value': 2},
+        {'code': 'BOS', 'value': 4}
+      ];
       Table t = new Table.from(rows);
       expect(t.nrow, 2);
       expect(t.ncol, 2);
@@ -56,7 +59,10 @@ table_simple() {
 
     test('construct table from row iterator (map elements not in same order)',
         () {
-      List rows = [{'code': 'BOS', 'value': 2}, {'value': 4, 'code': 'BOS'}];
+      List rows = [
+        {'code': 'BOS', 'value': 2},
+        {'value': 4, 'code': 'BOS'}
+      ];
       Table t = new Table.from(rows);
       expect(t.nrow, 2);
       expect(t.ncol, 2);
@@ -65,7 +71,10 @@ table_simple() {
     });
 
     test('construct table from row iterator (non-strict)', () {
-      List rows = [{'code': 'BOS', 'value': 2}, {'Tmin': 24, 'code': 'BOS'}];
+      List rows = [
+        {'code': 'BOS', 'value': 2},
+        {'Tmin': 24, 'code': 'BOS'}
+      ];
       Table t = new Table.from(rows, colnamesFromFirstRow: false);
       expect(t.nrow, 2);
       expect(t.ncol, 3);
@@ -81,20 +90,8 @@ table_simple() {
         new Column(['A', 'B'], 'equipment')
       ]);
       expect(t.nrow, 12);
-      expect(t['equipment'].data, [
-        'A',
-        'B',
-        'A',
-        'B',
-        'A',
-        'B',
-        'A',
-        'B',
-        'A',
-        'B',
-        'A',
-        'B'
-      ]);
+      expect(t['equipment'].data,
+          ['A', 'B', 'A', 'B', 'A', 'B', 'A', 'B', 'A', 'B', 'A', 'B']);
       //print(t);
     });
 
@@ -133,13 +130,30 @@ table_simple() {
     });
 
     test('print table', () {
-      List rows = [{'code': 'BOS', 'value': 2}, {'code': 'BOS', 'value': 4}];
+      List rows = [
+        {'code': 'BOS', 'value': 2},
+        {'code': 'BOS', 'value': 4}
+      ];
       Table t = new Table.from(rows);
       expect(t.toString(), 'code value\n BOS     2\n BOS     4');
     });
 
+    test('table toCsv()', () {
+      List rows = [
+        {'code': 'BOS', 'value': 2},
+        {'code': 'ATL', 'value': 4}
+      ];
+      Table t = new Table.from(rows);
+      print(t.toCsv());
+      expect(t.toCsv(), 'code,value\r\nBOS,2\r\nATL,4');
+    });
+
+
     test('adding a column with existing name throws', () {
-      List rows = [{'code': 'BOS', 'value': 2}, {'code': 'BOS', 'value': 4}];
+      List rows = [
+        {'code': 'BOS', 'value': 2},
+        {'code': 'BOS', 'value': 4}
+      ];
       Table t = new Table.from(rows);
       expect(() => t.addColumn([10, 15], name: 'value'), throwsArgumentError);
     });
@@ -156,15 +170,31 @@ table_simple() {
       expect(t.ncol, 2);
     });
 
+    test('remove two columns in cascade', () {
+      List rows = [
+        {'code': 'BOS', 'Tmin': 30, 'Tmax': 95},
+        {'code': 'BWI', 'Tmin': 32, 'Tmax': 100}
+      ];
+      Table t = new Table.from(rows);
+      t..removeColumn('Tmin')..removeColumn('Tmax');
+      expect(t.ncol, 1);
+    });
+
     test('add rows', () {
-      List rows = [{'code': 'BOS', 'Tmin': 30}, {'code': 'BOS', 'Tmin': 31}];
+      List rows = [
+        {'code': 'BOS', 'Tmin': 30},
+        {'code': 'BOS', 'Tmin': 31}
+      ];
       Table t = new Table.from(rows);
       t.addRow({'code': 'BOS', 'Tmin': 32});
       expect(t.nrow, 3);
     });
 
     test('add rows, filling with nulls', () {
-      List rows = [{'code': 'BOS', 'Tmin': 30}, {'code': 'BOS', 'Tmin': 31}];
+      List rows = [
+        {'code': 'BOS', 'Tmin': 30},
+        {'code': 'BOS', 'Tmin': 31}
+      ];
       Table t = new Table.from(rows);
       t.addRow({'Tmin': 32});
       expect(t.nrow, 3);
@@ -187,27 +217,45 @@ table_simple() {
     });
 
     test('rbind', () {
-      List rows = [{'code': 'BOS', 'Tmin': 30}, {'code': 'BOS', 'Tmin': 31},];
+      List rows = [
+        {'code': 'BOS', 'Tmin': 30},
+        {'code': 'BOS', 'Tmin': 31},
+      ];
       Table t1 = new Table.from(rows);
-      List rows2 = [{'code': 'BWI', 'Tmin': 33}, {'code': 'BWI', 'Tmin': 34},];
+      List rows2 = [
+        {'code': 'BWI', 'Tmin': 33},
+        {'code': 'BWI', 'Tmin': 34},
+      ];
       Table t2 = new Table.from(rows2);
       Table t = t1.rbind(t2);
       expect([t.nrow, t.ncol], [4, 2]);
       //print(t);
     });
     test('rbind with out of order columns', () {
-      List rows = [{'code': 'BOS', 'Tmin': 30}, {'code': 'BOS', 'Tmin': 31},];
+      List rows = [
+        {'code': 'BOS', 'Tmin': 30},
+        {'code': 'BOS', 'Tmin': 31},
+      ];
       Table t1 = new Table.from(rows);
-      List rows2 = [{'Tmin': 33, 'code': 'BWI'}, {'Tmin': 34, 'code': 'BWI'},];
+      List rows2 = [
+        {'Tmin': 33, 'code': 'BWI'},
+        {'Tmin': 34, 'code': 'BWI'},
+      ];
       Table t2 = new Table.from(rows2);
       Table t = t1.rbind(t2);
       expect([t.nrow, t.ncol], [4, 2]);
       //print(t);
     });
     test('rbind with extra columns - non strict', () {
-      List rows = [{'code': 'BOS', 'Tmin': 30}, {'code': 'BOS', 'Tmin': 31},];
+      List rows = [
+        {'code': 'BOS', 'Tmin': 30},
+        {'code': 'BOS', 'Tmin': 31},
+      ];
       Table t1 = new Table.from(rows);
-      List rows2 = [{'Tmax': 33, 'code': 'BWI'}, {'Tmax': 34, 'code': 'BWI'},];
+      List rows2 = [
+        {'Tmax': 33, 'code': 'BWI'},
+        {'Tmax': 34, 'code': 'BWI'},
+      ];
       Table t2 = new Table.from(rows2);
       Table t = t1.rbind(t2, strict: false);
       expect([t.nrow, t.ncol], [4, 3]);
@@ -217,9 +265,15 @@ table_simple() {
     });
 
     test('cbind', () {
-      List rows = [{'code': 'BOS', 'Tmin': 30}, {'code': 'BOS', 'Tmin': 31},];
+      List rows = [
+        {'code': 'BOS', 'Tmin': 30},
+        {'code': 'BOS', 'Tmin': 31},
+      ];
       Table t1 = new Table.from(rows);
-      List rows2 = [{'Tmax': 33, 'code': 'BWI'}, {'Tmax': 34, 'code': 'BWI'},];
+      List rows2 = [
+        {'Tmax': 33, 'code': 'BWI'},
+        {'Tmax': 34, 'code': 'BWI'},
+      ];
       Table t2 = new Table.from(rows2);
       Table t = t1.cbind(t2);
       //print(t);
@@ -228,7 +282,10 @@ table_simple() {
     });
 
     test('is rbind imutable?', () {
-      List rows = [{'code': 'BOS', 'Tmin': 30}, {'code': 'BOS', 'Tmin': 31},];
+      List rows = [
+        {'code': 'BOS', 'Tmin': 30},
+        {'code': 'BOS', 'Tmin': 31},
+      ];
       Table t1 = new Table.from(rows);
       Table t = t1.rbind(t1);
       expect([t.nrow, t.ncol], [4, 2]);
@@ -311,13 +368,15 @@ table_simple() {
         {'code': 'BWI', 'month': 'Feb', 'day': 2, 'Tmin': 37, 'Tmax': 50}
       ]);
 
-      var gT1 = t.groupApply((x) => x.length, groupBy: ['month'], variables: ['Tmin', 'Tmax']);
-      expect(gT1['Tmin'].data, [4,4]);
-      expect(gT1['Tmax'].data, [4,4]);
+      var gT1 = t.groupApply((x) => x.length,
+          groupBy: ['month'], variables: ['Tmin', 'Tmax']);
+      expect(gT1['Tmin'].data, [4, 4]);
+      expect(gT1['Tmax'].data, [4, 4]);
 
-      var gT2 = t.groupApply((x) => x.length, groupBy: ['month', 'code'], variables: ['Tmin', 'Tmax']);
-      expect(gT2['Tmin'].data, [2,2,2,2]);
-      expect(gT2['Tmax'].data, [2,2,2,2]);
+      var gT2 = t.groupApply((x) => x.length,
+          groupBy: ['month', 'code'], variables: ['Tmin', 'Tmax']);
+      expect(gT2['Tmin'].data, [2, 2, 2, 2]);
+      expect(gT2['Tmax'].data, [2, 2, 2, 2]);
     });
 
     test('group apply 2', () {
@@ -329,8 +388,9 @@ table_simple() {
         {'farm': 'B', 'checked': false, 'meatType': 'pork', 'quantity': 25},
         {'farm': 'B', 'checked': true, 'meatType': 'beef', 'quantity': 35}
       ]);
-      Function sum = (Iterable<num> x) => x.reduce((a,b) => a+b);
-      Table gT = t.groupApply(sum, groupBy: ['farm', 'checked'], variables: ['quantity']);
+      Function sum = (Iterable<num> x) => x.reduce((a, b) => a + b);
+      Table gT = t.groupApply(sum,
+          groupBy: ['farm', 'checked'], variables: ['quantity']);
       expect(gT['farm'].data, ['A', 'A', 'B', 'B']);
       expect(gT['checked'].data, [true, false, true, false]);
       expect(gT['quantity'].data, [30, 30, 50, 25]);
@@ -345,7 +405,7 @@ table_simple() {
       Table t = new Table.from(rows);
       Table tm = t.melt(['code']);
       expect(tm.nrow, 5);
-      expect(tm['value'].data, [34,30,32,95,100]);  // no nulls
+      expect(tm['value'].data, [34, 30, 32, 95, 100]); // no nulls
     });
 
     test('cast table', () {
@@ -367,8 +427,7 @@ table_simple() {
         {'code': 'BOS', 'variable': 'Tmax', 'id': 'B', 'value': 94},
         {'code': 'BWI', 'variable': 'Tmin', 'id': 'B', 'value': 30},
       ]);
-      Table tc = t.cast(['code'], ['id', 'variable'],
-          (x) => x.length, fill: 0);
+      Table tc = t.cast(['code'], ['id', 'variable'], (x) => x.length, fill: 0);
       //print(tc);
       expect(tc.nrow, 2);
       expect(tc['A_Tmin'].data, [2, 0]);
@@ -376,15 +435,15 @@ table_simple() {
 
     test('roll apply', () {
       DateTime startDt = new DateTime(2015);
-      List days = new List.generate(10, (i) => startDt.add(new Duration(days: i)));
-      Function sum = (Iterable x) => x.reduce((a,b) => a+b);
+      List days =
+          new List.generate(10, (i) => startDt.add(new Duration(days: i)));
+      Function sum = (Iterable x) => x.reduce((a, b) => a + b);
       Table t = new Table()
         ..addColumn(days, name: 'day')
-        ..addColumn([0,1,0,1,2,1,3,1,2,5], name: 'value');
+        ..addColumn([0, 1, 0, 1, 2, 1, 3, 1, 2, 5], name: 'value');
       t..addColumn(t.rollApply('value', 3, sum), name: 'sum3');
       expect(t['sum3'].data, [null, null, 1, 2, 3, 4, 6, 5, 6, 8]);
     });
-
   });
 }
 
@@ -410,5 +469,4 @@ main() {
 //  Ordering ord = new Ordering.natural().nullsFirst();
 //  List x = [1, null, 6, 3, 2];
 //  print(ord.sorted(x));
-
 }
