@@ -46,10 +46,7 @@ List _flatten(Map m, int level, List levelNames) {
     if (level < levelNames.length-1 && v is Map) {
       out ??= [];
       List aux = _flatten(v, level + 1, levelNames);
-      out.addAll(aux.map((Map e) {
-        e[name] = k;
-        return e;
-      }));
+      out.addAll(aux.map((Map e) => {name: k}..addAll(e)));
     } else {
       /// last level
       out ??= [];
@@ -57,7 +54,7 @@ List _flatten(Map m, int level, List levelNames) {
         v[name] = k;
         out.add(v);
       } else {
-        out.add({levelNames[level+1]: v, name: k});
+        out.add({name: k, levelNames[level+1]: v});
       }
     }
   });
