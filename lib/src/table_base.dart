@@ -719,7 +719,7 @@ class Table extends Object with IterableMixin<Map> {
     // the horizontal columns may need to be joined
     List<String> horizontalVals = [];
     if (horizontal.length == 1) {
-      horizontalVals = this[horizontal.first].data;
+      horizontalVals = this[horizontal.first].data.map((e) => e.toString()).toList();
     } else {
       this.forEach((row) {
         String str = horizontal.map((name) => row[name]).join('_');
