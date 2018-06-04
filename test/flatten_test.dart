@@ -111,14 +111,14 @@ test3Names() {
 }
 
 test2Names() {
-  Map data = {
-    'B1': {'Jan15': 1, 'Feb15': 2},
-    'B2': {'Jan15': 3, 'Feb15': 4},
-    'B3': {'Jan15': 5, 'Feb15': 6}
-  };
-  List res = flattenMap(data, levelNames: ['levelB', 'month', 'count', 'value']);
-  //res.forEach(print);
-  test('flattenMap, two nesting levels with names', () {
+  test('flattenMap, extra levelName get ignored', () {
+    Map data = {
+      'B1': {'Jan15': 1, 'Feb15': 2},
+      'B2': {'Jan15': 3, 'Feb15': 4},
+      'B3': {'Jan15': 5, 'Feb15': 6}
+    };
+    List res = flattenMap(data, levelNames: ['levelB', 'month', 'count', 'value']);
+    //res.forEach(print);
     expect(res, [
       {'levelB': 'B1', 'month': 'Jan15', 'count': 1},
       {'levelB': 'B1', 'month': 'Feb15', 'count': 2},
@@ -128,6 +128,20 @@ test2Names() {
       {'levelB': 'B3', 'month': 'Feb15', 'count': 6},
     ]);
   });
+  
+  test('flattenMap, one fewer levelName keeps the map', () {
+    Map a = {
+      0: {'CT': 10, 'MA': 11},
+      1: {'CT': 12, 'MA': 13},
+    };
+    var bux = flattenMap(a, ['index']);
+    //bux.forEach(print);
+    expect(bux, [
+      {'index': 0, 'CT': 10, 'MA': 11},
+      {'index': 1, 'CT': 12, 'MA': 13},      
+    ]);
+  });
+ 
 }
 
 extractValuesTest() {
