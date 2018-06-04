@@ -32,7 +32,7 @@ List extractValues(Map x) {
 ///  {'level0': 'foo2', 'level1': 'bar2', 'value': v22},
 ///  ...]
 ///
-/// To unrwap only part of the nested map, speficy fewer .
+/// To unrwap only part of the nested map, specify fewer 
 /// [levelNames]. 
 List<Map> flattenMap(Map m, List<String> levelNames) {
   return _flatten(m, 0, levelNames).toList();
@@ -51,8 +51,12 @@ List _flatten(Map m, int level, List levelNames) {
       /// last level
       out ??= [];
       if (v is Map) {
-        v[name] = k;
-        out.add(v);
+        if (level == levelNames.length-1) {
+          out.add({name: k}..addAll(v));
+        } else {
+          v[name] = k;
+          out.add(v);
+        }
       } else {
         out.add({name: k, levelNames[level+1]: v});
       }
