@@ -7,3 +7,4 @@ library table;
 export 'src/flattenMap.dart';
 export 'src/nest.dart';
 export 'src/table_base.dart';
+export 'src/unique.dart';
