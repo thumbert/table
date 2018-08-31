@@ -20,7 +20,7 @@ Future<Table> loadData() async {
       "https://vincentarelbundock.github.io/Rdatasets/csv/Ecdat/Diamond.csv";
   HttpClientRequest request = await new HttpClient().getUrl(Uri.parse(url));
   HttpClientResponse response = await request.close();
-  String res = await response.transform(UTF8.decoder).join();
+  String res = await response.transform(Utf8Decoder()).join();
 
   List<Map> rows = [];
   List keys = ['id', 'carat', 'color', 'clarity', 'certification', 'price'];
@@ -37,7 +37,7 @@ dataAnalysis(Table data) {
   print(c);
 
   print('\ncount of clarity vs. color');
-  Table cc = data.cast(['clarity'], ['color'], (x) => x.length, fill: 0);
+  Table cc = data.reshape(['clarity'], ['color'], (x) => x.length, fill: 0);
   print(cc);
 }
 

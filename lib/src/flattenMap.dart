@@ -35,11 +35,11 @@ List extractValues(Map x) {
 /// To unwrap only part of the nested map, specify fewer
 /// [levelNames]. 
 List<Map> flattenMap(Map m, List<String> levelNames) {
-  return _flatten(m, 0, levelNames).toList();
+  return _flatten(m, 0, levelNames);
 }
 
 List _flatten(Map m, int level, List levelNames) {
-  List out;
+  List<Map> out;
   String name  = levelNames[level];
 
   m.forEach((k, v) {

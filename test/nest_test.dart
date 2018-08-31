@@ -143,10 +143,10 @@ simpleTests() {
 }
 
 main() {
-
-  simpleTests();
-
-  barleyTests();
+  group('Nest tests:', (){
+    simpleTests();
+    barleyTests();
+  });
 }
 
 

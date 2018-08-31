@@ -209,12 +209,14 @@ extractValuesTest() {
 
 
 main() {
-  test1();
-  test2();
-  test3();
-  test2Names();
-  test3Names();
-  extractValuesTest();
+  group('flattenMap tests:', (){
+    test1();
+    test2();
+    test3();
+    test2Names();
+    test3Names();
+    extractValuesTest();
+  });
 }
 
 

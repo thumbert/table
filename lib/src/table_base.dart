@@ -6,17 +6,17 @@ import 'package:collection/collection.dart';
 import 'package:more/ordering.dart';
 import 'package:csv/csv.dart';
 
-enum JOIN_TYPE { OUTER_JOIN, LEFT_JOIN, RIGHT_JOIN, INNER_JOIN }
+enum JoinType { outer, left, right, inner }
 
-enum ALIGN_TYPE { FIRST, LAST, CENTER }
+enum AlignType { first, last, center }
 
-enum NullOrdering { FIRST, LAST }
+enum NullOrdering { first, last }
 
 class Column<E> {
   List<E> data;
   String name;
 
-  Column(List this.data, String this.name);
+  Column(this.data, this.name);
 
   E operator [](int i) => data[i];
 
@@ -25,7 +25,7 @@ class Column<E> {
   List toList() => data;
 
   Iterable<String> _paddedOutput() {
-    List aux = [name]..addAll(data.map((e) => e.toString()));
+    var aux = [name]..addAll(data.map((e) => e.toString()));
     int width = aux.fold(0, (prev, e) => max(prev, e.length));
     return aux.map((String e) => e.padLeft(width));
   }
@@ -78,13 +78,14 @@ class Table extends Object with IterableMixin<Map> {
    *
    *
    */
-  Table.from(Iterable rows, {bool colnamesFromFirstRow: true}) {
+  Table.from(Iterable<Map> rows, {bool colnamesFromFirstRow: true}) {
     if (colnamesFromFirstRow) {
-      _colnames = rows.first.keys.toList();
+      _colnames = rows.first.keys.map((e) => e.toString()).toList();
     } else {
       // it's easiest to traverse twice -- unfortunately
-      Set _names = new Set();
-      rows.forEach((Map row) => _names = _names.union(row.keys.toSet()));
+      var _names = new Set<String>();
+      rows.forEach((Map row) =>
+        _names = _names.union(row.keys.map((e) => e.toString()).toSet()));
       _colnames = _names.toList();
     }
     _colnames.forEach((name) => _data.add(new Column([], name)));
@@ -245,7 +246,7 @@ class Table extends Object with IterableMixin<Map> {
    * by specifying the [columnNames] list.
    */
   Table distinct({List<String> columnNames}) {
-    Set uRows = new LinkedHashSet(
+    var uRows = new LinkedHashSet(
         equals: _rowEquality.equals,
         isValidKey: _rowEquality.isValidKey,
         hashCode: (e) => _rowEquality.hash(e));
@@ -340,7 +341,7 @@ class Table extends Object with IterableMixin<Map> {
    * that have the same name.
    *
    */
-  Table joinTable(Table other, JOIN_TYPE type) {
+  Table joinTable(Table other, JoinType type) {
     List<String> by =
         colnames.toSet().intersection(other.colnames.toSet()).toList();
     if (by.isEmpty)
@@ -414,19 +415,19 @@ class Table extends Object with IterableMixin<Map> {
     }
 
     switch (type) {
-      case JOIN_TYPE.INNER_JOIN:
+      case JoinType.inner:
         _addInnerRows();
         break;
-      case JOIN_TYPE.OUTER_JOIN:
+      case JoinType.outer:
         _addInnerRows();
         _addLeftOnlyRows();
         _addRightOnlyRows();
         break;
-      case JOIN_TYPE.LEFT_JOIN:
+      case JoinType.left:
         _addInnerRows();
         _addLeftOnlyRows();
         break;
-      case JOIN_TYPE.RIGHT_JOIN:
+      case JoinType.right:
         _addInnerRows();
         _addRightOnlyRows();
         break;
@@ -457,14 +458,14 @@ class Table extends Object with IterableMixin<Map> {
    * Function [f] takes an element of the iterable and returns a grouping value.
    * In this case the Iterable x is the actual table.
    */
-  Map _groupByIndex(Iterable x, Function f) {
-    Map result = new LinkedHashMap(
+  Map<dynamic, List<int>> _groupByIndex(Iterable x, Function f) {
+    Map<dynamic, List<int>> result = new LinkedHashMap(
         equals: _rowEquality.equals,
         isValidKey: _rowEquality.isValidKey,
         hashCode: (e) => _rowEquality.hash(e));
 
     int ind = 0;
-    x.forEach((Map row) {
+    x.forEach((row) {
       result.putIfAbsent(f(row), () => []).add(ind);
       ind += 1;
     });
@@ -486,25 +487,25 @@ class Table extends Object with IterableMixin<Map> {
    * Function f = (Iterable<num> x) => x.reduce((a,b) => {'sum': a+b});
    * ```
    */
-  Table groupApply(Function f, {List<String> groupBy, List<String> variables}) {
+  Table groupApply(dynamic f(Iterable<dynamic> x), {List<String> groupBy, List<String> variables}) {
     var by = groupBy.where((e) => colnames.contains(e)).toList();
-    List vars = variables.where((e) => colnames.contains(e)).toList();
+    List<String> vars = variables.where((e) => colnames.contains(e)).toList();
     Map _colIndex = new Map.fromIterables(
         colnames, new List.generate(colnames.length, (i) => i));
-    List res = [];
+    var res = <Map>[];
 
     if (groupBy == null) {
       this.forEach((Map row) {
-        res.add(f(row));
+        res.add(f([row]));
       });
     } else {
-      Map<Map, List<int>> groups = _groupByIndex(
+      var groups = _groupByIndex(
           this,
           (e) => new Map.fromIterables(
               by, new List.generate(by.length, (i) => e[by[i]])));
 
-      groups.forEach((Map k, List ind) {
-        Map row = new Map.from(k);
+      groups.forEach((k, List ind) {
+        var row = new Map.from(k as Map);
         vars.forEach((String variable) {
           var aux = ind.map((i) => _data[_colIndex[variable]].data[i]);
           row[variable] = f(aux);
@@ -576,15 +577,15 @@ class Table extends Object with IterableMixin<Map> {
    *
    */
   List rollApply(String variable, int width, Function f,
-      {ALIGN_TYPE align: ALIGN_TYPE.LAST}) {
-    if (width % 2 == 0 && align == ALIGN_TYPE.CENTER)
+      {AlignType align: AlignType.last}) {
+    if (width % 2 == 0 && align == AlignType.center)
       throw 'ALIGN_TYPE.CENTER does not work for an even width.';
 
     int iEnd = width;
     List res = [];
-    if (align == ALIGN_TYPE.LAST)
+    if (align == AlignType.last)
       res.addAll(new List.filled(width - 1, null));
-    else if (align == ALIGN_TYPE.CENTER)
+    else if (align == AlignType.center)
       res.addAll(new List.filled(width ~/ 2, null));
 
     while (iEnd <= nrow) {
@@ -592,9 +593,9 @@ class Table extends Object with IterableMixin<Map> {
       iEnd += 1;
     }
 
-    if (align == ALIGN_TYPE.FIRST)
+    if (align == AlignType.first)
       res.addAll(new List.filled(width - 1, null));
-    else if (align == ALIGN_TYPE.CENTER)
+    else if (align == AlignType.center)
       res.addAll(new List.filled(width ~/ 2, null));
 
     return res;
@@ -612,7 +613,7 @@ class Table extends Object with IterableMixin<Map> {
    * Return a new table.
    */
   Table order(Map<String, int> orderBy,
-      {NullOrdering nullOrdering: NullOrdering.FIRST}) {
+      {NullOrdering nullOrdering: NullOrdering.first}) {
     List<String> keys = orderBy.keys.toList();
     Ordering ord;
 
@@ -621,30 +622,27 @@ class Table extends Object with IterableMixin<Map> {
       Ordering aux = new Ordering.natural();
       if (orderBy[name] == -1) aux = aux.reversed;
       switch (nullOrdering) {
-        case NullOrdering.FIRST:
+        case NullOrdering.first:
           aux = aux.nullsFirst;
           break;
-        case NullOrdering.LAST:
+        case NullOrdering.last:
           aux = aux.nullsLast;
           break;
       }
-      aux = aux.onResultOf((Map row) => row[name]);
+      aux = aux.onResultOf((row) => row[name]);
       if (name == keys.first) {
         ord = aux;
       } else {
         ord = ord.compound(aux);
       }
     });
-
-    return new Table.from(ord.sorted(this));
+    return new Table.from(ord.sorted(this).cast<Map>());
   }
 
-  /**
-   * Order the rows of the table according to a specific Ordering.
-   *
-   * Return a new table.
-   */
-  Table orderWith(Ordering ordering) => new Table.from(ordering.sorted(this));
+  /// Order the rows of the table according to a specific Ordering.
+  /// Return a new table.
+  Table orderWith(Ordering ordering) =>
+      new Table.from(ordering.sorted(this) as List<Map>);
 
   /**
    * A melt method similar to the R reshape package.
@@ -696,7 +694,7 @@ class Table extends Object with IterableMixin<Map> {
    * Missing values are filled with `null`s by default, unless specified by
    * the `fill` argument.
    */
-  Table cast(List<String> vertical, List<String> horizontal, Function f,
+  Table reshape(List<String> vertical, List<String> horizontal, Function f,
       {String variable: 'value', fill: null}) {
     List<String> grp = new List.from(vertical)..addAll(horizontal);
 
@@ -713,7 +711,7 @@ class Table extends Object with IterableMixin<Map> {
     // group rows
     Function _fg = (Map row) =>
         new Map.fromIterables(vertical, vertical.map((g) => row[g]));
-    Map<String, List<int>> ind = _groupByIndex(this, _fg);
+    var ind = _groupByIndex(this, _fg);
     int indValue = colnames.indexOf(variable);
 
     // the horizontal columns may need to be joined
@@ -727,12 +725,12 @@ class Table extends Object with IterableMixin<Map> {
       });
     }
 
-    List res = [];
+    var res = <Map>[];
     ind.forEach((k, List v) {
       Map row = {};
       vertical.forEach((name) => row[name] = k[name]);
 
-      v.forEach((int i) => row[horizontalVals[i]] = this.column(indValue)[i]);
+      v.forEach((i) => row[horizontalVals[i]] = this.column(indValue)[i]);
       res.add(row);
     });
 
@@ -800,7 +798,7 @@ class Table extends Object with IterableMixin<Map> {
   /// Sample [n] rows from this table and return it as another table.
   Table sample({int n: 6}) {
     Random rand = new Random();
-    List res = [];
+    var res = <Map>[];
     for (int i = 0; i < n; i++) {
       res.add(row(rand.nextInt(nrow)));
     }

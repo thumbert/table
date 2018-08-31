@@ -71,7 +71,7 @@ class Nest {
   dynamic _entries(List x, int depth) {
     if (depth >= _keys.length) return _rollup != null ? _rollup(x) : x;
 
-    List res = [];
+    var res = <Map>[];
     x.forEach((v) {
       var k = _keys[depth](v);
       bool exists = false;

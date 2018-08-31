@@ -3,7 +3,6 @@
 
 library table.test;
 
-import 'dart:async';
 import 'package:test/test.dart';
 import 'package:table/table.dart';
 
@@ -47,7 +46,7 @@ table_simple() {
     });
 
     test('construct table from row iterator', () {
-      List rows = [
+      var rows = <Map>[
         {'code': 'BOS', 'value': 2},
         {'code': 'BOS', 'value': 4}
       ];
@@ -59,7 +58,7 @@ table_simple() {
 
     test('construct table from row iterator (map elements not in same order)',
         () {
-      List rows = [
+      var rows = <Map>[
         {'code': 'BOS', 'value': 2},
         {'value': 4, 'code': 'BOS'}
       ];
@@ -71,7 +70,7 @@ table_simple() {
     });
 
     test('construct table from row iterator (non-strict)', () {
-      List rows = [
+      var rows = <Map>[
         {'code': 'BOS', 'value': 2},
         {'Tmin': 24, 'code': 'BOS'}
       ];
@@ -117,7 +116,7 @@ table_simple() {
     });
 
     test('unique rows of a table', () {
-      List rows = [
+      var rows = <Map>[
         {'code': 'BOS', 'value': 2},
         {'code': 'BWI', 'value': 10},
         {'code': 'BOS', 'value': 2},
@@ -130,7 +129,7 @@ table_simple() {
     });
 
     test('print table', () {
-      List rows = [
+      var rows = <Map>[
         {'code': 'BOS', 'value': 2},
         {'code': 'BOS', 'value': 4}
       ];
@@ -139,18 +138,18 @@ table_simple() {
     });
 
     test('table toCsv()', () {
-      List rows = [
+      var rows = <Map>[
         {'code': 'BOS', 'value': 2},
         {'code': 'ATL', 'value': 4}
       ];
       Table t = new Table.from(rows);
-      print(t.toCsv());
+      //print(t.toCsv());
       expect(t.toCsv(), 'code,value\r\nBOS,2\r\nATL,4');
     });
 
 
     test('adding a column with existing name throws', () {
-      List rows = [
+      var rows = <Map>[
         {'code': 'BOS', 'value': 2},
         {'code': 'BOS', 'value': 4}
       ];
@@ -159,7 +158,7 @@ table_simple() {
     });
 
     test('remove columns', () {
-      List rows = [
+      var rows = <Map>[
         {'code': 'BOS', 'Tmin': 30, 'Tmax': 95},
         {'code': 'BWI', 'Tmin': 32, 'Tmax': 100}
       ];
@@ -171,7 +170,7 @@ table_simple() {
     });
 
     test('remove two columns in cascade', () {
-      List rows = [
+      var rows = <Map>[
         {'code': 'BOS', 'Tmin': 30, 'Tmax': 95},
         {'code': 'BWI', 'Tmin': 32, 'Tmax': 100}
       ];
@@ -181,7 +180,7 @@ table_simple() {
     });
 
     test('add rows', () {
-      List rows = [
+      var rows = <Map>[
         {'code': 'BOS', 'Tmin': 30},
         {'code': 'BOS', 'Tmin': 31}
       ];
@@ -191,7 +190,7 @@ table_simple() {
     });
 
     test('add rows, filling with nulls', () {
-      List rows = [
+      var rows = <Map>[
         {'code': 'BOS', 'Tmin': 30},
         {'code': 'BOS', 'Tmin': 31}
       ];
@@ -202,7 +201,7 @@ table_simple() {
     });
 
     test('remove rows', () {
-      List rows = [
+      var rows = <Map>[
         {'code': 'BOS', 'Tmin': 30},
         {'code': 'BOS', 'Tmin': 31},
         {'code': 'BOS', 'Tmin': 32},
@@ -217,12 +216,12 @@ table_simple() {
     });
 
     test('rbind', () {
-      List rows = [
+      var rows = <Map>[
         {'code': 'BOS', 'Tmin': 30},
         {'code': 'BOS', 'Tmin': 31},
       ];
       Table t1 = new Table.from(rows);
-      List rows2 = [
+      var rows2 = <Map>[
         {'code': 'BWI', 'Tmin': 33},
         {'code': 'BWI', 'Tmin': 34},
       ];
@@ -232,12 +231,12 @@ table_simple() {
       //print(t);
     });
     test('rbind with out of order columns', () {
-      List rows = [
+      var rows = <Map>[
         {'code': 'BOS', 'Tmin': 30},
         {'code': 'BOS', 'Tmin': 31},
       ];
       Table t1 = new Table.from(rows);
-      List rows2 = [
+      var rows2 = <Map>[
         {'Tmin': 33, 'code': 'BWI'},
         {'Tmin': 34, 'code': 'BWI'},
       ];
@@ -247,12 +246,12 @@ table_simple() {
       //print(t);
     });
     test('rbind with extra columns - non strict', () {
-      List rows = [
+      var rows = <Map>[
         {'code': 'BOS', 'Tmin': 30},
         {'code': 'BOS', 'Tmin': 31},
       ];
       Table t1 = new Table.from(rows);
-      List rows2 = [
+      var rows2 = <Map>[
         {'Tmax': 33, 'code': 'BWI'},
         {'Tmax': 34, 'code': 'BWI'},
       ];
@@ -265,12 +264,12 @@ table_simple() {
     });
 
     test('cbind', () {
-      List rows = [
+      var rows = <Map>[
         {'code': 'BOS', 'Tmin': 30},
         {'code': 'BOS', 'Tmin': 31},
       ];
       Table t1 = new Table.from(rows);
-      List rows2 = [
+      var rows2 = <Map>[
         {'Tmax': 33, 'code': 'BWI'},
         {'Tmax': 34, 'code': 'BWI'},
       ];
@@ -282,7 +281,7 @@ table_simple() {
     });
 
     test('is rbind imutable?', () {
-      List rows = [
+      var rows = <Map>[
         {'code': 'BOS', 'Tmin': 30},
         {'code': 'BOS', 'Tmin': 31},
       ];
@@ -295,7 +294,7 @@ table_simple() {
     });
 
     test('order table', () {
-      List rows = [
+      var rows = <Map>[
         {'code': 'BOS', 'Tmin': 31, 'Tmax': 95},
         {'code': 'BWI', 'Tmin': 37, 'Tmax': 95},
         {'code': 'BOS', 'Tmin': 30, 'Tmax': null},
@@ -308,7 +307,7 @@ table_simple() {
     });
 
     test('order table 2', () {
-      List rows = [
+      var rows = <Map>[
         {'code': 'BOS', 'Tmin': 31, 'Tmax': 95},
         {'code': 'BWI', 'Tmin': 37, 'Tmax': 95},
         {'code': 'BOS', 'Tmin': 30, 'Tmax': null},
@@ -335,21 +334,21 @@ table_simple() {
         {'code': 'ORH', 'Tmax': 92},
         {'code': 'LAX', 'Tmax': 82}
       ]);
-      Table ti = t1.joinTable(t2, JOIN_TYPE.INNER_JOIN);
+      Table ti = t1.joinTable(t2, JoinType.inner);
       expect(ti.nrow, 2);
       expect(ti['code'].data, ['BOS', 'LAX']);
       expect(ti['Tmax'].data, [95, 82]);
 
-      Table tl = t1.joinTable(t2, JOIN_TYPE.LEFT_JOIN);
+      Table tl = t1.joinTable(t2, JoinType.left);
       expect(tl.nrow, 3);
       expect(tl['Tmax'].data, [95, 82, null]);
 
-      Table tr = t1.joinTable(t2, JOIN_TYPE.RIGHT_JOIN);
+      Table tr = t1.joinTable(t2, JoinType.right);
       expect(tr.nrow, 3);
       expect(tr['code'].data, ['BOS', 'LAX', 'ORH']);
       expect(tr['Tmin'].data, [30, 49, null]);
 
-      Table to = t1.joinTable(t2, JOIN_TYPE.OUTER_JOIN);
+      Table to = t1.joinTable(t2, JoinType.outer);
       expect(to.nrow, 4);
       expect(to['code'].data, ['BOS', 'LAX', 'BWI', 'ORH']);
       expect(to['Tmin'].data, [30, 49, 32, null]);
@@ -388,7 +387,7 @@ table_simple() {
         {'farm': 'B', 'checked': false, 'meatType': 'pork', 'quantity': 25},
         {'farm': 'B', 'checked': true, 'meatType': 'beef', 'quantity': 35}
       ]);
-      Function sum = (Iterable<num> x) => x.reduce((a, b) => a + b);
+      Function sum = (Iterable x) => x.reduce((a, b) => a + b);
       Table gT = t.groupApply(sum,
           groupBy: ['farm', 'checked'], variables: ['quantity']);
       expect(gT['farm'].data, ['A', 'A', 'B', 'B']);
@@ -397,7 +396,7 @@ table_simple() {
     });
 
     test('melt table', () {
-      List rows = [
+      var rows = <Map>[
         {'code': 'BOS', 'Tmin': 34, 'Tmax': 95},
         {'code': 'BOS', 'Tmin': 30, 'Tmax': null},
         {'code': 'BWI', 'Tmin': 32, 'Tmax': 100}
@@ -415,7 +414,7 @@ table_simple() {
         {'code': 'BOS', 'variable': 'Tmax', 'value': 94},
         {'code': 'BWI', 'variable': 'Tmin', 'value': 30},
       ]);
-      Table tc = t.cast(['code'], ['variable'], (x) => x.length);
+      Table tc = t.reshape(['code'], ['variable'], (x) => x.length);
       expect(tc.nrow, 2);
       expect(tc['Tmax'].data, [1, null]);
     });
@@ -427,7 +426,7 @@ table_simple() {
         {'code': 'BOS', 'variable': 'Tmax', 'id': 'B', 'value': 94},
         {'code': 'BWI', 'variable': 'Tmin', 'id': 'B', 'value': 30},
       ]);
-      Table tc = t.cast(['code'], ['id', 'variable'], (x) => x.length, fill: 0);
+      Table tc = t.reshape(['code'], ['id', 'variable'], (x) => x.length, fill: 0);
       //print(tc);
       expect(tc.nrow, 2);
       expect(tc['A_Tmin'].data, [2, 0]);
