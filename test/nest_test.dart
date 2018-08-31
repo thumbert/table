@@ -36,7 +36,7 @@ simpleTests() {
   Map f = {'foo': 2, 'bar': 'b'};
   test('nest one level, get entries', () {
     Nest nest = new Nest()..key((e) => e['foo']);
-    List res = nest.entries([a, b, c, d, e, f]);
+    List<Map> res = nest.entries([a, b, c, d, e, f]);
     //res.forEach(print);
     expect(res.firstWhere((Map e) => e['key'] == 1)['values'].length, 4);
     expect(res.firstWhere((Map e) => e['key'] == 2)['values'].length, 2);

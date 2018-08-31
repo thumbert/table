@@ -94,7 +94,7 @@ test3Names() {
       'B2': {'C1': 7, 'C2': 8}
     },
   };
-  List res = flattenMap(data, levelNames: ['levelA', 'levelB', 'levelC', 'value']);
+  List res = flattenMap(data, ['levelA', 'levelB', 'levelC', 'value']);
   //res.forEach(print);
   test('flattenMap, three nesting levels with names', () {
     expect(res, [
@@ -117,7 +117,7 @@ test2Names() {
       'B2': {'Jan15': 3, 'Feb15': 4},
       'B3': {'Jan15': 5, 'Feb15': 6}
     };
-    List res = flattenMap(data, levelNames: ['levelB', 'month', 'count', 'value']);
+    List res = flattenMap(data, ['levelB', 'month', 'count', 'value']);
     //res.forEach(print);
     expect(res, [
       {'levelB': 'B1', 'month': 'Jan15', 'count': 1},

@@ -14,13 +14,13 @@ uniqueMapTest() {
       expect(res.length, 2);
     });
     test('with one name', (){
-      var res = unique(xs, names: ['type']);
+      var res = unique(xs, keys: ['type']);
       expect(res.length, 2);
       expect(res, [{'type': 'A'}, {'type': 'B'},]);
     });
     test('with two names', (){
       xs.add({'type': 'A', 'time': new DateTime(2019), 'value': 10});
-      var res = unique(xs, names: ['type', 'time']);
+      var res = unique(xs, keys: ['type', 'time']);
       var out = [
         {'type': 'A', 'time': new DateTime(2018)},
         {'type': 'B', 'time': new DateTime(2018)},

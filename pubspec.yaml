@@ -1,15 +1,15 @@
 name: table
 description: A table like data structure for Dart
-version: 0.0.1
-author: Tony Humbert <humbert.tony@yahoo.com>
+version: 1.0.0
+author: Tony Humbert <tony.humberts@gmail.com>
 homepage: https://github.com/thumbert/table.git
 
 environment:
-  sdk: '>=1.0.0 <2.0.0'
+  sdk: '>=2.0.0 <3.0.0'
 
 dependencies:
-  csv: ^3.1.2
-  more: ^1.8.1
+  csv: ^4.0.0
+  more: ^1.10.1
 
 dev_dependencies:
-  test: '>=0.12.0 <0.13.0'
+  test: '>=1.0.0 <2.0.0'
