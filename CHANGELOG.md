@@ -1,5 +1,5 @@
 # Changelog
 
-## 0.0.1
+## 0.9.0 (Released on 2018-08-30)
 
-- Initial version, created by Stagehand
+- Last Dart 1 version
