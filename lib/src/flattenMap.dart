@@ -34,22 +34,22 @@ List extractValues(Map x) {
 ///
 /// To unwrap only part of the nested map, specify fewer
 /// [levelNames]. 
-List<Map> flattenMap(Map m, List<String> levelNames) {
+List<Map<String,dynamic>> flattenMap(Map m, List<String> levelNames) {
   return _flatten(m, 0, levelNames);
 }
 
-List _flatten(Map m, int level, List levelNames) {
-  List<Map> out;
+List<Map<String,dynamic>> _flatten(Map m, int level, List levelNames) {
+  List<Map<String,dynamic>> out;
   String name  = levelNames[level];
 
   m.forEach((k, v) {
     if (level < levelNames.length-1 && v is Map) {
-      out ??= [];
-      List<Map> aux = _flatten(v, level + 1, levelNames);
+      out ??= <Map<String,dynamic>>[];
+      var aux = _flatten(v, level + 1, levelNames);
       out.addAll(aux.map((Map e) => {name: k}..addAll(e)));
     } else {
       /// last level
-      out ??= [];
+      out ??= <Map<String,dynamic>>[];
       if (v is Map) {
         if (level == levelNames.length-1) {
           out.add({name: k}..addAll(v));
@@ -64,4 +64,5 @@ List _flatten(Map m, int level, List levelNames) {
   });
   return out;
 }
+
 
