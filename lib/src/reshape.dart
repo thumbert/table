@@ -1,5 +1,8 @@
 library reshape;
 
+import 'dart:collection';
+import 'package:collection/collection.dart';
+
 /// Reshape/pivot a list of maps.
 /// Each element of input [xs] needs to have the same keys .
 ///
@@ -31,3 +34,29 @@ List<Map> reshape(List<Map<String, dynamic>> xs, List<String> vertical,
 
   return res;
 }
+
+
+/// Utility to group rows by a given function.
+/// Each key of the resulting Map is the grouping value.
+/// Each value of the resulting Map is a list of row indices.
+///
+/// It is a more memory efficient way to do the grouping.
+/// Function [f] takes an element of the iterable and returns a grouping value.
+/// In this case the Iterable x is the actual table.
+Map<dynamic, List<int>> _groupByIndex(Iterable x, Function f) {
+  const _rowEquality = const MapEquality();
+  Map<dynamic, List<int>> result = new LinkedHashMap(
+      equals: _rowEquality.equals,
+      isValidKey: _rowEquality.isValidKey,
+      hashCode: (e) => _rowEquality.hash(e));
+
+  int ind = 0;
+  x.forEach((row) {
+    result.putIfAbsent(f(row), () => []).add(ind);
+    ind += 1;
+  });
+
+  return result;
+}
+
+
