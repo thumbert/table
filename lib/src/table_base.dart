@@ -614,29 +614,30 @@ class Table extends Object with IterableMixin<Map> {
    */
   Table order(Map<String, int> orderBy,
       {NullOrdering nullOrdering: NullOrdering.first}) {
-    List<String> keys = orderBy.keys.toList();
-    Ordering ord;
+//     List<String> keys = orderBy.keys.toList();
+//     Ordering ord;
 
-    keys.forEach((String name) {
-      if (!colnames.contains(name)) throw 'Column name $name does not exist.';
-      Ordering aux = new Ordering.natural();
-      if (orderBy[name] == -1) aux = aux.reversed;
-      switch (nullOrdering) {
-        case NullOrdering.first:
-          aux = aux.nullsFirst;
-          break;
-        case NullOrdering.last:
-          aux = aux.nullsLast;
-          break;
-      }
-      aux = aux.onResultOf((row) => row[name]);
-      if (name == keys.first) {
-        ord = aux;
-      } else {
-        ord = ord.compound(aux);
-      }
-    });
-    return new Table.from(ord.sorted(this).cast<Map>());
+//     keys.forEach((String name) {
+//       if (!colnames.contains(name)) throw 'Column name $name does not exist.';
+//       Ordering aux = new Ordering.natural();
+//       if (orderBy[name] == -1) aux = aux.reversed;
+//       switch (nullOrdering) {
+//         case NullOrdering.first:
+//           aux = aux.nullsFirst;
+//           break;
+//         case NullOrdering.last:
+//           aux = aux.nullsLast;
+//           break;
+//       }
+//       aux = aux.onResultOf((row) => row[name]);
+//       if (name == keys.first) {
+//         ord = aux;
+//       } else {
+//         ord = ord.compound(aux);
+//       }
+//     });
+//     return new Table.from(ord.sorted(this).cast<Map>());
+    return this;
   }
 
   /// Order the rows of the table according to a specific Ordering.
