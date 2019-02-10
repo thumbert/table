@@ -1,3 +1,4 @@
+import 'package:test/test.dart';
 import 'package:table/table.dart' as table;
 
 tests() {

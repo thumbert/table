@@ -18,9 +18,9 @@ tests() {
       var res = reorderColumns(xs, ['year', 'tMax']);
       expect(res.first.keys.toList(), ['year', 'tMax']);
     });
-    test('reordering with a new column throws', (){
-      var res = reorderColumns(xs, ['year', 'tMax', 'wMax']);
-      expect(res.first.keys.toList(), ['year', 'tMax']);
+    test('reordering with a non existing column throws', (){
+      expect(() => reorderColumns(xs, ['year', 'tMax', 'wMax']),
+          throwsArgumentError);
     });
   });
 }

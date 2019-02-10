@@ -614,12 +614,12 @@ class Table extends Object with IterableMixin<Map> {
    */
   Table order(Map<String, int> orderBy,
       {NullOrdering nullOrdering: NullOrdering.first}) {
-//     List<String> keys = orderBy.keys.toList();
-//     Ordering ord;
+     var keys = orderBy.keys.toList();
+     Ordering ord;
 
 //     keys.forEach((String name) {
 //       if (!colnames.contains(name)) throw 'Column name $name does not exist.';
-//       Ordering aux = new Ordering.natural();
+//       var aux = Ordering.natural();
 //       if (orderBy[name] == -1) aux = aux.reversed;
 //       switch (nullOrdering) {
 //         case NullOrdering.first:
@@ -636,7 +636,7 @@ class Table extends Object with IterableMixin<Map> {
 //         ord = ord.compound(aux);
 //       }
 //     });
-//     return new Table.from(ord.sorted(this).cast<Map>());
+//     return Table.from(ord.sorted(this).cast<Map>());
     return this;
   }
 

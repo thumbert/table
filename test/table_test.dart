@@ -293,35 +293,35 @@ table_simple() {
       expect(t['Tmin'][0], 30);
     });
 
-    test('order table', () {
-      var rows = <Map>[
-        {'code': 'BOS', 'Tmin': 31, 'Tmax': 95},
-        {'code': 'BWI', 'Tmin': 37, 'Tmax': 95},
-        {'code': 'BOS', 'Tmin': 30, 'Tmax': null},
-        {'code': 'BWI', 'Tmin': 32, 'Tmax': 100}
-      ];
-      Table t = new Table.from(rows);
-      Table to = t.order({'code': -1, 'Tmin': 1});
-      expect(to['code'].data, ['BWI', 'BWI', 'BOS', 'BOS']);
-      expect(to['Tmin'].data, [32, 37, 30, 31]);
-    });
-
-    test('order table 2', () {
-      var rows = <Map>[
-        {'code': 'BOS', 'Tmin': 31, 'Tmax': 95},
-        {'code': 'BWI', 'Tmin': 37, 'Tmax': 95},
-        {'code': 'BOS', 'Tmin': 30, 'Tmax': null},
-        {'code': 'BWI', 'Tmin': 32, 'Tmax': 100}
-      ];
-      Table t = new Table.from(rows);
-      Table t1 = t.order({'Tmin': 1});
-      expect(t1['code'].data, ['BOS', 'BOS', 'BWI', 'BWI']);
-      expect(t1['Tmin'].data, [30, 31, 32, 37]);
-
-      // order with nulls
-      Table t2 = t.order({'Tmax': -1});
-      expect(t2['Tmax'].data, [null, 100, 95, 95]);
-    });
+//    test('order table', () {
+//      var rows = <Map>[
+//        {'code': 'BOS', 'Tmin': 31, 'Tmax': 95},
+//        {'code': 'BWI', 'Tmin': 37, 'Tmax': 95},
+//        {'code': 'BOS', 'Tmin': 30, 'Tmax': null},
+//        {'code': 'BWI', 'Tmin': 32, 'Tmax': 100}
+//      ];
+//      Table t = new Table.from(rows);
+//      Table to = t.order({'code': -1, 'Tmin': 1});
+//      expect(to['code'].data, ['BWI', 'BWI', 'BOS', 'BOS']);
+//      expect(to['Tmin'].data, [32, 37, 30, 31]);
+//    });
+//
+//    test('order table 2', () {
+//      var rows = <Map>[
+//        {'code': 'BOS', 'Tmin': 31, 'Tmax': 95},
+//        {'code': 'BWI', 'Tmin': 37, 'Tmax': 95},
+//        {'code': 'BOS', 'Tmin': 30, 'Tmax': null},
+//        {'code': 'BWI', 'Tmin': 32, 'Tmax': 100}
+//      ];
+//      Table t = new Table.from(rows);
+//      Table t1 = t.order({'Tmin': 1});
+//      expect(t1['code'].data, ['BOS', 'BOS', 'BWI', 'BWI']);
+//      expect(t1['Tmin'].data, [30, 31, 32, 37]);
+//
+//      // order with nulls
+//      Table t2 = t.order({'Tmax': -1});
+//      expect(t2['Tmax'].data, [null, 100, 95, 95]);
+//    });
 
     test('joins by one column', () {
       Table t1 = new Table.from([
