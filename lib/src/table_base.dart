@@ -619,7 +619,7 @@ class Table extends Object with IterableMixin<Map> {
 
     keys.forEach((String name) {
       if (!colnames.contains(name)) throw 'Column name $name does not exist.';
-      Ordering aux = new Ordering.natural();
+      var aux = Ordering.natural();
       if (orderBy[name] == -1) aux = aux.reversed;
       switch (nullOrdering) {
         case NullOrdering.first:
