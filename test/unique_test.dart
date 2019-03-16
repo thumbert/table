@@ -1,8 +1,9 @@
+library test.unique_test;
 
 import 'package:test/test.dart';
 import 'package:table/table.dart';
 
-uniqueMapTest() {
+tests() {
   group('unique maps:', (){
     List<Map> xs = [
       {'type': 'A', 'time': new DateTime(2018), 'value': 10},
@@ -32,5 +33,5 @@ uniqueMapTest() {
 }
 
 main() {
-  uniqueMapTest();
+  tests();
 }

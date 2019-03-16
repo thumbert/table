@@ -5,6 +5,7 @@
 library table;
 
 export 'src/add_missing.dart';
+export 'src/join.dart';
 export 'src/flattenMap.dart';
 export 'src/nest.dart';
 export 'src/rename_columns.dart';
