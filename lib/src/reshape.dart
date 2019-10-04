@@ -10,27 +10,45 @@ List<Map> reshape(List<Map<String, dynamic>> xs, List<String> vertical,
     List<String> horizontal, String variable, {fill: null}) {
   // group rows
   var _fg =
-      (Map row) => new Map.fromIterables(vertical, vertical.map((g) => row[g]));
+      (Map row) => Map.fromIterables(vertical, vertical.map((g) => row[g]));
   var ind = _groupByIndex(xs, _fg);
 
-  // the horizontal columns may need to be joined
+  // the horizontal columns need to be joined, if more than 1
   var horizontalVals = <String>[];
   if (horizontal.length == 1) {
     horizontalVals = xs.map((e) => e[horizontal.first].toString()).toList();
   } else {
     xs.forEach((row) {
-      String str = horizontal.map((name) => row[name]).join('_');
+      var str = horizontal.map((name) => row[name]).join('_');
       horizontalVals.add(str);
     });
   }
 
+  var _columnNames = <String>{...horizontalVals};
+
+//  var res = <Map<String, dynamic>>[];
+//  ind.forEach((k, List v) {
+//    var row = <String, dynamic>{};
+//    vertical.forEach((name) => row[name] = k[name]);
+//    v.forEach((i) => row[horizontalVals[i]] = xs[i][variable]);
+//    res.add(row);
+//  });
+
   var res = <Map<String, dynamic>>[];
-  ind.forEach((k, List v) {
+  for (var entry in ind.entries) {
     var row = <String, dynamic>{};
-    vertical.forEach((name) => row[name] = k[name]);
-    v.forEach((i) => row[horizontalVals[i]] = xs[i][variable]);
+    vertical.forEach((name) => row[name] = entry.key[name]);
+    for (var c in _columnNames) {
+      row[c] = fill;
+    }
+    for (var e in entry.value) {
+      row[horizontalVals[e]] = xs[e][variable];
+    }
+
     res.add(row);
-  });
+  }
+
+
 
   return res;
 }

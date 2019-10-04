@@ -5,7 +5,7 @@ author: Tony Humbert <tony.humberts@gmail.com>
 homepage: https://github.com/thumbert/table.git
 
 environment:
-  sdk: '>=2.0.0 <3.0.0'
+  sdk: '>=2.4.0 <3.0.0'
 
 dependencies:
   csv: ^4.0.0
