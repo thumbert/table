@@ -5,11 +5,13 @@
 library table;
 
 export 'src/add_missing.dart';
+export 'src/columns_to_rows.dart';
 export 'src/join.dart';
 export 'src/flattenMap.dart';
 export 'src/nest.dart';
 export 'src/rename_columns.dart';
 export 'src/reorder_columns.dart';
 export 'src/reshape.dart';
+export 'src/rows_to_columns.dart';
 export 'src/table_base.dart';
 export 'src/unique.dart';

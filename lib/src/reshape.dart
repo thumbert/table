@@ -26,14 +26,6 @@ List<Map> reshape(List<Map<String, dynamic>> xs, List<String> vertical,
 
   var _columnNames = <String>{...horizontalVals};
 
-//  var res = <Map<String, dynamic>>[];
-//  ind.forEach((k, List v) {
-//    var row = <String, dynamic>{};
-//    vertical.forEach((name) => row[name] = k[name]);
-//    v.forEach((i) => row[horizontalVals[i]] = xs[i][variable]);
-//    res.add(row);
-//  });
-
   var res = <Map<String, dynamic>>[];
   for (var entry in ind.entries) {
     var row = <String, dynamic>{};
