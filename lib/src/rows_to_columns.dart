@@ -6,6 +6,7 @@ library rows_to_columns;
 /// Allows you to "flatten" multiple rows into columnar data.
 ///
 Map<String, List> rowsToColumns(List<Map<String,dynamic>> xs) {
+  if (xs.isEmpty) return <String,List>{};
   var columns = xs.first.keys.toSet();
   var out = Map.fromIterables(columns,
       List.generate(columns.length, (i) => []));
