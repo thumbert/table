@@ -1,13 +1,12 @@
 library rows_to_columns;
 
-
-
 /// Go from a list of row-like data to a column-like map.
 /// Allows you to "flatten" multiple rows into columnar data.
 ///
-Map<String, List> rowsToColumns(List<Map<String,dynamic>> xs) {
+Map<String, List> rowsToColumns(List<Map<String,dynamic>> xs,
+    {List<String> columns}) {
   if (xs.isEmpty) return <String,List>{};
-  var columns = xs.first.keys.toSet();
+  columns ??= xs.first.keys.toList();
   var out = Map.fromIterables(columns,
       List.generate(columns.length, (i) => []));
   for (var x in xs) {

@@ -26,6 +26,18 @@ tests() {
         'value': [1, 2, 3],
       });
     });
+    test('three columns', () {
+      var xs = [
+        {'month': '2019-01', 'type': 'A', 'value': 1},
+        {'month': '2019-02', 'type': 'A', 'value': 2},
+        {'month': '2019-03', 'type': 'B', 'value': 3},
+      ];
+      var out = rowsToColumns(xs, columns: ['month', 'value']);
+      expect(out, {
+        'month': ['2019-01', '2019-02', '2019-03'],
+        'value': [1, 2, 3],
+      });
+    });
 
   });
 }
