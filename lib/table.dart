@@ -6,6 +6,7 @@ library table;
 
 export 'src/add_missing.dart';
 export 'src/columns_to_rows.dart';
+export 'src/column_sum.dart';
 export 'src/join.dart';
 export 'src/flattenMap.dart';
 export 'src/nest.dart';
