@@ -1,5 +1,7 @@
 library column_sum;
 
+import 'package:dama/dama.dart';
+
   /// Sum the list columns of each element of the input list.
   /// All elements of the input list have the same structure, with entry values
   /// that are either values or lists.
