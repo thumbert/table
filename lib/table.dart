@@ -9,6 +9,7 @@ export 'src/columns_to_rows.dart';
 export 'src/column_sum.dart';
 export 'src/join.dart';
 export 'src/flattenMap.dart';
+export 'src/melt.dart';
 export 'src/nest.dart';
 export 'src/rename_columns.dart';
 export 'src/reorder_columns.dart';
