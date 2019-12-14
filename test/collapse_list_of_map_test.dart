@@ -1,6 +1,6 @@
-library test.rows_to_columns;
+library test.collapse_list_of_map_test;
 
-import 'package:table/src/rows_to_columns.dart';
+import 'package:table/src/collapse_list_of_map.dart';
 import 'package:test/test.dart';
 
 tests() {
@@ -11,16 +11,16 @@ tests() {
         {'values': 2},
         {'values': 3},
       ];
-      var out = rowsToColumns(xs);
+      var out = collapseListOfMap(xs);
       expect(out, {'values': [1, 2, 3]});
     });
-    test('tow columns', () {
+    test('two columns', () {
       var xs = [
         {'month': '2019-01', 'value': 1},
         {'month': '2019-02', 'value': 2},
         {'month': '2019-03', 'value': 3},
       ];
-      var out = rowsToColumns(xs);
+      var out = collapseListOfMap(xs);
       expect(out, {
         'month': ['2019-01', '2019-02', '2019-03'],
         'value': [1, 2, 3],
@@ -32,7 +32,7 @@ tests() {
         {'month': '2019-02', 'type': 'A', 'value': 2},
         {'month': '2019-03', 'type': 'B', 'value': 3},
       ];
-      var out = rowsToColumns(xs, columns: ['month', 'value']);
+      var out = collapseListOfMap(xs, columns: ['month', 'value']);
       expect(out, {
         'month': ['2019-01', '2019-02', '2019-03'],
         'value': [1, 2, 3],

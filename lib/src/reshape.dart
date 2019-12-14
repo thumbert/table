@@ -4,37 +4,43 @@ import 'dart:collection';
 import 'package:collection/collection.dart';
 
 /// Reshape/pivot a list of maps.
-/// Each element of input [xs] needs to have the same keys .
+/// Each element of input [xs] needs to have the same keys.
+/// Input [xs] is in the long format.  To bring a data set in the long format
+/// use [melt].
 ///
-List<Map> reshape(List<Map<String, dynamic>> xs, List<String> vertical,
-    List<String> horizontal, String variable, {fill: null}) {
+/// [rows] is the list of variables that will remain as rows.
+/// [columns] is the list of variables that will become columns.  Usually
+/// [columns] is a single element list.
+///
+List<Map> reshape(List<Map<String, dynamic>> xs, List<String> rows,
+    List<String> columns, String variable, {fill: null}) {
   // group rows
   var _fg =
-      (Map row) => Map.fromIterables(vertical, vertical.map((g) => row[g]));
+      (Map row) => Map.fromIterables(rows, rows.map((g) => row[g]));
   var ind = _groupByIndex(xs, _fg);
 
-  // the horizontal columns need to be joined, if more than 1
-  var horizontalVals = <String>[];
-  if (horizontal.length == 1) {
-    horizontalVals = xs.map((e) => e[horizontal.first].toString()).toList();
+  // the columns need to be joined, if more than 1
+  var columnVals = <String>[];
+  if (columns.length == 1) {
+    columnVals = xs.map((e) => e[columns.first].toString()).toList();
   } else {
     xs.forEach((row) {
-      var str = horizontal.map((name) => row[name]).join('_');
-      horizontalVals.add(str);
+      var str = columns.map((name) => row[name]).join('_');
+      columnVals.add(str);
     });
   }
 
-  var _columnNames = <String>{...horizontalVals};
+  var _columnNames = <String>{...columnVals};
 
   var res = <Map<String, dynamic>>[];
   for (var entry in ind.entries) {
     var row = <String, dynamic>{};
-    vertical.forEach((name) => row[name] = entry.key[name]);
+    rows.forEach((name) => row[name] = entry.key[name]);
     for (var c in _columnNames) {
       row[c] = fill;
     }
     for (var e in entry.value) {
-      row[horizontalVals[e]] = xs[e][variable];
+      row[columnVals[e]] = xs[e][variable];
     }
 
     res.add(row);

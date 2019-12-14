@@ -1,5 +1,10 @@
 library melt.dart;
 
+/// Use this functionto bring a data set into a database first normal form.
+/// See https://en.wikipedia.org/wiki/First_normal_form.
+///
+/// Use the same name as R's melt from the reshape package.
+///
 List<Map<String,dynamic>> melt(List<Map<String,dynamic>> xs,
     Set<String> tagsKey, Set<String> variablesKey, {String value: 'value'}) {
   var aux = <Map<String,dynamic>>[];

@@ -1,7 +1,7 @@
 library all_test;
 
-import 'columns_to_rows_test.dart' as c2r;
-import 'rows_to_columns_test.dart' as r2c;
+import 'expand_map_of_list_test.dart' as c2r;
+import 'collapse_list_of_map_test.dart' as r2c;
 import 'flatten_test.dart' as flatten;
 import 'join_test.dart' as join;
 import 'nest_test.dart' as nest;

@@ -5,6 +5,7 @@ packages
 pubspec.lock
 
 .buildlog
+.dart_tool
 .DS_Store
 .idea
 .packages

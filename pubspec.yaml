@@ -9,6 +9,9 @@ environment:
 
 dependencies:
   csv: ^4.0.0
+  dama:
+    git:
+      url: git://github.com/thumbert/dama.git
   more: ^1.10.1
 
 dev_dependencies:

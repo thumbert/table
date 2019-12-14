@@ -5,15 +5,15 @@
 library table;
 
 export 'src/add_missing.dart';
-export 'src/columns_to_rows.dart';
+export 'src/expand_map_of_list.dart';
 export 'src/column_sum.dart';
 export 'src/join.dart';
-export 'src/flattenMap.dart';
+export 'src/flatten_map.dart';
 export 'src/melt.dart';
 export 'src/nest.dart';
 export 'src/rename_columns.dart';
 export 'src/reorder_columns.dart';
 export 'src/reshape.dart';
-export 'src/rows_to_columns.dart';
+export 'src/collapse_list_of_map.dart';
 export 'src/table_base.dart';
 export 'src/unique.dart';
