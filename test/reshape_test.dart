@@ -1,7 +1,9 @@
+library reshape_test;
+
 import 'package:test/test.dart';
 import 'package:table/table.dart' as table;
 
-tests() {
+void tests() {
   group('Reshape', () {
     test('table with just one column', () {
       var xs = <Map<String, dynamic>>[
@@ -51,7 +53,7 @@ tests() {
 }
 
 
-main() {
+void main() {
   tests();
 }
 

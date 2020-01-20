@@ -1,6 +1,6 @@
 library melt.dart;
 
-/// Use this functionto bring a data set into a database first normal form.
+/// Use this function to bring a data set into a database first normal form.
 /// See https://en.wikipedia.org/wiki/First_normal_form.
 ///
 /// Use the same name as R's melt from the reshape package.

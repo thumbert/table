@@ -23,11 +23,12 @@ List<Map<String, dynamic>> columnSum(List<Map<String, dynamic>> xs,
   for (var x in xs) {
     var one = <String, dynamic>{};
     for (var column in keys) {
-      if (x[column] is List)
+      if (x[column] is List) {
         one[column] =
             sum((x[column] as List).cast<num>().where((e) => accept(e)));
-      else
+      } else {
         one[column] = x[column];
+      }
     }
     out.add(one);
   }
