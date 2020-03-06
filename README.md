@@ -1,159 +1,27 @@
 # table
 
-A table-like data structure for Dart.  It allows for convenient
-split-apply-combine workflows typically used in data analysis.
-
-This package borrows ideas from `R`'s `data.frame` and the
-[reshape](http://had.co.nz/reshape/) package.
-
-## NOTE
-
-This code is very experimental.  I have no ideas yet how well things work, how
-natural the code feels, how fast table manipulations are, etc.  In any case, as all
-the operations are done in memory, this package is best suited for small to
-medium size problems (let's just say small if you are from Texas.)  The goal of this
-package is *convenience* not speed or a small memory footprint.
-
-Also, the API may change savagely from one minor version to another.  When things
-stabilize this message will disappear.
-
+Various utilities for interacting with tabular like data.  In particular, 
+it contains an implementation of the *Nest* framework as introduced in 
+the [D3](https://github.com/d3/d3-collection#nests) nests package.
 
 ## Usage
+Here's an example using Cleveland's barley data.  
+To calculate the total yield by year and variety do
 
-### Terminology
-
-A table is composed of variables arranged in columns.  This document will interchangeably
-mix the terms column and variable.  Each row of a table is said to form an observation,
-also referred to as a record.  Conceptually, variables can be categorical/grouping/id
-variables or measurement variables.  Missing variable values are encoded with
-`null`'s.  (No, `null` is not his last name,  we just don't know his last name.)
-
-
-### Examples
-Create a table with two columns
 ```dart
-Table t = new Table()
-  ..addColumn(['BWI', 'BWI', 'BOS'], name: 'code')
-  ..addColumn([31, 30, 33], name: 'Tmin');
+var nest = Nest()
+  ..key((d) => d['year'])
+  ..key((d) => d['variety'])
+  ..rollup((List xs) => sum(xs.map((e) => e['yield'])));
+var res = nest.map(barley) as Map;
 ```
-The table has `t.nrow` rows and `t.ncol` columns.  You can set or get the column names 
-using `t.colnames`.
+The result will be a two-level nested map.
 
-You can add additional rows of data with `t.addRow({'code': 'LAX', 'Tmin': 45})`.
-
-A table can also be created directly from an iterable of rows.
-```dart
-Table t1 = new Table.from([
-        {'code': 'BOS', 'Tmin': 30},
-        {'code': 'BWI', 'Tmin': 32},
-        {'code': 'LAX', 'Tmin': 49}
-      ]);
-```
-
-You can extract the column of a table by a direct subset of the table `t['code']`.
-
-`Table` extends `IterableMixin` so for example you can filter rows as any other iterable
- ```t.where((Map row) => row['Tmin'] > 33)```
-
-Often it is useful to find the distinct values of a few columns (variables).
-`t.distinct(variables: ['code'])` for example to return the distinct values of the
-code variable.
-
-Sort the rows of the table with
-```dart
-t.order({'code': 1, 'Tmin': -1})
-```
-where column `code` is sorted ascendingly and column `Tmin` is sorted descendingly.
-
-You can column bind `cbind` two tables with the same number of rows.  You can
-row bind `rbind` two tables with the same column names.
-
-#### Joins 
-Tables can be joined in the SQL sense on columns that have the same name.  For example, 
-given the two tables 
-```dart
-Table t1 = new Table.from([
-        {'code': 'BOS', 'Tmin': 30},
-        {'code': 'BWI', 'Tmin': 32},
-        {'code': 'LAX', 'Tmin': 49}
-      ]);
-Table t2 = new Table.from([
-        {'code': 'BOS', 'Tmax': 95},
-        {'code': 'ORH', 'Tmax': 92},
-        {'code': 'LAX', 'Tmax': 82}
-      ]);
-```
-you can do an inner join by the variable `code` like this
-```dart
-Table tbl = t1.joinTable(t2, JOIN_TYPE.INNER_JOIN);
-```
-to get 
-
-| code  | Tmin   | Tmax  |
-| ----- | ------ | ----- |
-| BOS   |  30    | 95    |
-| LAX   |  49    | 82    |
-
-#### Group apply
-
-You can split the table into groups according to several variables and then 
-apply a function to a variable from each individual groups.  For example, given 
-the table
-```dart
-Table t = new Table.from([
-        {'farm': 'A', 'checked': true, 'meatType': 'poultry', 'quantity': 10},
-        {'farm': 'A', 'checked': true, 'meatType': 'pork', 'quantity': 20},
-        {'farm': 'A', 'checked': false, 'meatType': 'beef', 'quantity': 30},
-        {'farm': 'B', 'checked': true, 'meatType': 'poultry', 'quantity': 15},
-        {'farm': 'B', 'checked': false, 'meatType': 'pork', 'quantity': 25},
-        {'farm': 'B', 'checked': true, 'meatType': 'beef', 'quantity': 35}
-]);
-Function sum = (Iterable<num> x) => x.reduce((a,b) => a+b);
-Table gT = t.groupApply(['farm', 'checked'], ['quantity'], sum);
-```
-you calculate the total quantity by `farm` and `checked` variable to get
-
-| farm | checked | quantity |
-| ---- | ------- | -------- |
-| A    | true    | 30       |
-| A    | false   | 30       |
-| B    | true    | 50       |
-| B    | false   | 25       |
-
-The `groupApply` method is the equivalent of the SQL group by statement.
 
  
 #### Reshape (melt and cast) 
 As in the `R`'s [reshape](http://had.co.nz/reshape/) package, there are 
-two methods `melt` and `cast` to allow for reshaping a table. 
-
-See the `test` directory for additional examples. 
-
-For example, given this table `t`  
-
-| code | variable | id | value |
-| ---- | ------- | -------- | ---- |
-| BOS    | Tmin    | A       | 34 |
-| BOS    | Tmin    | A       | 34 |
-| BOS    | Tmax    | B       | 94 |
-| BOS    | Tmin    | B       | 30 |
-
- 
-to calculate the number of observations with variable `code` 
-on the vertical and variables `id` and `variable` on the horizontal you do  
-```dart
-      Table tc = t.cast(['code'], ['id', 'variable'],
-          (x) => x.length, fill: 0);
-```
-
-| code | A_Tmin | B_Tmax | B_Tmin |
-| ---- | ------ | ------ | ------ |
-| BOS  | 2      | 1      | 0      |
-| BWI  | 0      | 0      | 1      |
-
-Note how zeros are added for the missing combinations and the names of the new columns 
-get created by concatenating the joint groups. 
-
+two functions `melt` and `cast` to allow for reshaping of data. 
 
 
 ## Features and bugs

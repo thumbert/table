@@ -1,12 +1,11 @@
 library test.nest;
 
+import 'package:dama/dama.dart';
 import 'package:table/src/nest.dart';
 import 'package:test/test.dart';
 import 'data.dart';
 
-void barleyTests() {
-
-}
+void barleyTests() {}
 
 void tests() {
   group('Nest tests:', () {
@@ -25,10 +24,10 @@ void tests() {
     var f = {'foo': 2, 'bar': 'b'};
     test('nest one level, get entries', () {
       var nest = Nest()..key((e) => e['foo']);
-      List<Map> res = nest.entries([a, b, c, d, e, f]);
+      var res = nest.entries([a, b, c, d, e, f]);
       //res.forEach(print);
-      expect(res.firstWhere((Map e) => e['key'] == 1)['values'].length, 4);
-      expect(res.firstWhere((Map e) => e['key'] == 2)['values'].length, 2);
+      expect(res.firstWhere((e) => e['key'] == 1)['values'].length, 4);
+      expect(res.firstWhere((e) => e['key'] == 2)['values'].length, 2);
       expect(res, [
         {
           'key': 1,
@@ -126,9 +125,7 @@ void tests() {
       });
     });
     test('nest map with two keys', () {
-      var nest = Nest()
-        ..key((Map e) => e['foo'])
-        ..key((Map e) => e['bar']);
+      var nest = Nest()..key((Map e) => e['foo'])..key((Map e) => e['bar']);
       expect(nest.map([a, b, c, d, e, f]), {
         1: {
           'a': [a, b],
@@ -142,15 +139,27 @@ void tests() {
     });
   });
 
-
   group('Nest test (barley data):', () {
+    var barley = loadDataBarley();
     test('barley data nest by year/variety', () {
-      var barley = loadDataBarley();
       var nest = Nest()..key((d) => d['year'])..key((d) => d['variety']);
-      List res = nest.entries(barley);
+      var res = nest.entries(barley) as List;
       expect(res.length, 2);
+      expect(res.map((e) => e['key']).toList(), ['1931', '1932']);
+      var x1931 = res.firstWhere((e) => e['key'] == '1931') as Map;
+      expect(x1931.keys.toSet(), {'key', 'values'});
+      expect((x1931['values'] as List).length, 10); // 10 varieties
     });
 
+    test('Aggregate barley yield by year & variety', () {
+      var nest = Nest()
+        ..key((d) => d['year'])
+        ..key((d) => d['variety'])
+        ..rollup((List xs) => sum(xs.map((e) => e['yield'])));
+      var res = nest.map(barley) as Map;
+      expect(res.keys.toSet(), {'1931', '1932'});
+      expect(res['1931']['Peatland'], 219.5);
+    });
   });
 }
 

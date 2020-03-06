@@ -1,4 +1,7 @@
 
+
+/// Barley data
+/// There are 2 years (1931, 1932), 6 sites, and 10 varieties.
 List<Map<String,dynamic>> loadDataBarley() {
   return <Map<String,dynamic>>[
     {

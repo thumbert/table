@@ -1,13 +1,14 @@
 library nest;
 
-
-/// Implement a nest construct as in D3
 class Nest {
-  List<Function> _keys = [];
-  //List _sortKeys = [];
+  List<Function> _keys;
   Function _rollup;
 
-  Nest();
+  /// Define a nesting object.  Use keys and rollup functions to aggregate data.
+  /// See https://github.com/d3/d3-collection#nests for the original idea.
+  Nest(){
+    _keys = <Function>[];
+  }
 
   /// Register the function [f] as a key to this nest object.  The key function will be
   /// invoked for each element in the input list and must return a string identifier
@@ -36,6 +37,9 @@ class Nest {
   /// ]
   /// If there is a roll function, it returns the result as the leaf of the nest.
   ///
+  /// If there is no rollup function, entries only performs a grouping.
+  /// If there is a rollup function, the result is the result of the
+  /// rollup function.
   dynamic entries(List values) {
     return _entries(values, 0);
   }
@@ -50,34 +54,39 @@ class Nest {
   ///    'foo2': {'bar1': [...], 'bar2': [...], ...},
   ///    ...
   ///  }
-  Map map(List<Map> values) {
+  dynamic map(List<Map> values) {
     return _map(values, 0);
   }
 
   dynamic _map(List x, int depth) {
-    if (depth >= _keys.length) return _rollup != null ? _rollup(x) : x;
+    if (depth >= _keys.length) {
+      return _rollup != null ? _rollup(x) : x;
+    }
 
-    Map res = {};
+    var res = {};
     x.forEach((v) {
       var k = _keys[depth](v);
       res.putIfAbsent(k, () => []).add(v);
     });
 
-    return new Map.fromIterables(
+    return Map.fromIterables(
         res.keys, res.keys.map((k) => _map(res[k], depth + 1)));
   }
 
-
+  // the return needs to be dynamic, because it's either a List or
+  // the result of the rollup function which can be a single value.
   dynamic _entries(List x, int depth) {
-    if (depth >= _keys.length) return _rollup != null ? _rollup(x) : x;
+    if (depth >= _keys.length) {
+      return _rollup != null ? _rollup(x) : x;
+    }
 
     var res = <Map>[];
     x.forEach((v) {
       var k = _keys[depth](v);
-      bool exists = false;
-      int i = 0;
+      var exists = false;
+      var i = 0;
       // do I have a more efficient way to search that the key exists?
-      for (Map g in res) {
+      for (var g in res) {
         if (g['key'] == k) {
           exists = true;
           break;
@@ -100,7 +109,7 @@ class Nest {
 
     return res
         .map((Map g) =>
-    {'key': g['key'], 'values': _entries(g['values'], depth + 1)})
+            {'key': g['key'], 'values': _entries(g['values'], depth + 1)})
         .toList();
   }
 }
