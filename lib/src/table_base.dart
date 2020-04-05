@@ -33,21 +33,19 @@ class Column<E> {
   String toString() => _paddedOutput().join('\n');
 }
 
-/**
- * A tabular view of columnar data iterable by row.  A table holds observations
- * of different variables.  Each variable is stored in a [Column].
- *
- * Data in columns is supposed to be of the same type, although this
- * is not enforced.
- *
- * Conceptually, variables belong in two separate groups.
- * Categorical/classification/id variables and measurement variables.  For example,
- * a categorical variable may be an airport code, and a measurement variable
- * may be the daily max temperature at that location.
- *
- * The null value is used to indicate missing data only.
- *
- */
+/// A tabular view of columnar data iterable by row.  A table holds observations
+/// of different variables.  Each variable is stored in a [Column].
+///
+/// Data in columns is supposed to be of the same type, although this
+/// is not enforced.
+///
+/// Conceptually, variables belong in two separate groups.
+/// Categorical/classification/id variables and measurement variables.  For example,
+/// a categorical variable may be an airport code, and a measurement variable
+/// may be the daily max temperature at that location.
+///
+/// The null value is used to indicate missing data only.
+///
 class Table extends Object with IterableMixin<Map> {
   List<Column> _data = [];
   List<String> _colnames = [];
@@ -55,9 +53,7 @@ class Table extends Object with IterableMixin<Map> {
   static const _setEquality = const SetEquality();
   static var _fillValue = null;
 
-  /**
-   * Construct an empty (0 rows) table with columns.
-   */
+  /// Construct an empty (0 rows) table with columns.
   Table({List<String> colnames}) {
     if (colnames != null) {
       _colnames = colnames;
@@ -65,19 +61,17 @@ class Table extends Object with IterableMixin<Map> {
     }
   }
 
-  /**
-   * Generate a table from an iterable of rows.  Each element of the iterable is a Map.
-   * The first element of the [rows] iterable is used to determine the column names.
-   * Only the keys of a row that overlap with the keys from the first row
-   * are added to the table.  Rows don't need to have keys in the same order.
-   *
-   * If [colnamesFromFirstRow] is `true` the keys of the first element of rows
-   * will determine the column names of the table.
-   *
-   * Missing data for a column will be assigned `null`.
-   *
-   *
-   */
+  /// Generate a table from an iterable of rows.  Each element of the iterable is a Map.
+  /// The first element of the [rows] iterable is used to determine the column names.
+  /// Only the keys of a row that overlap with the keys from the first row
+  /// are added to the table.  Rows don't need to have keys in the same order.
+  ///
+  /// If [colnamesFromFirstRow] is `true` the keys of the first element of rows
+  /// will determine the column names of the table.
+  ///
+  /// Missing data for a column will be assigned `null`.
+  ///
+  ///
   Table.from(Iterable<Map> rows, {bool colnamesFromFirstRow: true}) {
     if (colnamesFromFirstRow) {
       _colnames = rows.first.keys.map((e) => e.toString()).toList();
@@ -106,10 +100,8 @@ class Table extends Object with IterableMixin<Map> {
     }
   }
 
-  /**
-   * Create a table by taking the Cartesian product of a list of Columns.
-   * The columns can have different number of elements.
-   */
+  /// Create a table by taking the Cartesian product of a list of Columns.
+  /// The columns can have different number of elements.
   Table.fromCartesianProduct(List<Column> columns) {
     _colnames = columns.map((e) => e.name).toList();
     int N = columns.fold(1, (a, Column b) => a * b.data.length);
@@ -449,15 +441,13 @@ class Table extends Object with IterableMixin<Map> {
     return result;
   }
 
-  /**
-   * Utility to group rows by a given function.
-   * Each key of the resulting Map is the grouping value.
-   * Each value of the resulting Map is a list of row indices.
-   *
-   * It is a more memory efficient way to do the grouping.
-   * Function [f] takes an element of the iterable and returns a grouping value.
-   * In this case the Iterable x is the actual table.
-   */
+  /// Utility to group rows by a given function.
+  /// Each key of the resulting Map is the grouping value.
+  /// Each value of the resulting Map is a list of row indices.
+  ///
+  /// It is a more memory efficient way to do the grouping.
+  /// Function [f] takes an element of the iterable and returns a grouping value.
+  /// In this case the Iterable x is the actual table.
   Map<dynamic, List<int>> _groupByIndex(Iterable x, Function f) {
     Map<dynamic, List<int>> result = new LinkedHashMap(
         equals: _rowEquality.equals,

@@ -3,7 +3,7 @@ library test.expand_map_of_list_test;
 import 'package:table/src/expand_map_of_list.dart';
 import 'package:test/test.dart';
 
-tests() {
+void tests() {
   group('columns to rows:', () {
     test('one column', () {
       var xs = {'values': [1, 2, 3]};
@@ -29,6 +29,6 @@ tests() {
   });
 }
 
-main() {
+void main() {
   tests();
 }
