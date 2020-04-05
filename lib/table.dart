@@ -4,6 +4,7 @@
 /// The table library.
 library table;
 
+export 'src/aggregate.dart';
 export 'src/add_missing.dart';
 export 'src/expand_map_of_list.dart';
 export 'src/column_sum.dart';
