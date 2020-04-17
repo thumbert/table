@@ -25,11 +25,12 @@ class Column<E> {
   List toList() => data;
 
   Iterable<String> _paddedOutput() {
-    var aux = [name]..addAll(data.map((e) => e.toString()));
-    int width = aux.fold(0, (prev, e) => max(prev, e.length));
+    var aux = [name, ...data.map((e) => e.toString())];
+    var width = aux.fold(0, (prev, e) => max(prev as int, e.length));
     return aux.map((String e) => e.padLeft(width));
   }
 
+  @override
   String toString() => _paddedOutput().join('\n');
 }
 
@@ -47,17 +48,21 @@ class Column<E> {
 /// The null value is used to indicate missing data only.
 ///
 class Table extends Object with IterableMixin<Map> {
-  List<Column> _data = [];
-  List<String> _colnames = [];
-  static const _rowEquality = const MapEquality();
-  static const _setEquality = const SetEquality();
-  static var _fillValue = null;
+  List<Column> _data = <Column>[];
+  List<String> _colnames = <String>[];
+  static const _rowEquality = MapEquality();
+  static const _setEquality = SetEquality();
+  static var _fillValue;
 
   /// Construct an empty (0 rows) table with columns.
   Table({List<String> colnames}) {
+    _data = <Column>[];
+    _colnames = <String>[];
     if (colnames != null) {
       _colnames = colnames;
-      _colnames.forEach((name) => _data.add(new Column([], name)));
+      for (var name in colnames) {
+        _data.add(Column([], name));
+      }
     }
   }
 
@@ -72,19 +77,19 @@ class Table extends Object with IterableMixin<Map> {
   /// Missing data for a column will be assigned `null`.
   ///
   ///
-  Table.from(Iterable<Map> rows, {bool colnamesFromFirstRow: true}) {
+  Table.from(Iterable<Map> rows, {bool colnamesFromFirstRow = true}) {
     if (colnamesFromFirstRow) {
       _colnames = rows.first.keys.map((e) => e.toString()).toList();
     } else {
       // it's easiest to traverse twice -- unfortunately
-      var _names = new Set<String>();
+      var _names = <String>{};
       rows.forEach((Map row) =>
         _names = _names.union(row.keys.map((e) => e.toString()).toSet()));
       _colnames = _names.toList();
     }
-    _colnames.forEach((name) => _data.add(new Column([], name)));
-    Map _ind = new Map.fromIterables(
-        _colnames, new List.generate(_colnames.length, (i) => i));
+    _colnames.forEach((name) => _data.add(Column([], name)));
+    var _ind = Map.fromIterables(
+        _colnames, List.generate(_colnames.length, (i) => i));
 
     if (_fillValue == null) {
       rows.forEach((Map row) {
@@ -122,43 +127,40 @@ class Table extends Object with IterableMixin<Map> {
     }
   }
 
-  Iterator<Map> get iterator => new _TableIterator(this);
+  @override
+  Iterator<Map> get iterator => _TableIterator(this);
 
-  /**
-   * Add a column to this table.  When you add a new column to the table, the data you add
-   * needs to match exactly the existing number of rows in the table.
-   *
-   * If the proposed column name already exists, the code throws.
-   * If the name already exists, a new column name gets generated in the form 'V{number}'.
-   *
-   */
+  /// Add a column to this table.  When you add a new column to the table, the data you add
+  /// needs to match exactly the existing number of rows in the table.
+  ///
+  /// If the proposed column name already exists, the code throws.
+  /// If the name already exists, a new column name gets generated in the form 'V{number}'.
+  ///
   void addColumn(List x, {String name}) {
-    if (ncol > 0 && nrow != x.length)
-      throw new ArgumentError(
-          'Cannot add column.  Number of rows does not match');
-    if (name == null)
+    if (ncol > 0 && nrow != x.length) {
+      throw ArgumentError('Cannot add column.  Number of rows does not match');
+    }
+    if (name == null) {
       name = _makeColumnName(ncol + 1);
-    else if (_colnames.contains(name)) {
-      throw new ArgumentError('Column ${name} already exists, and strict = true');
+    } else if (_colnames.contains(name)) {
+      throw ArgumentError('Column ${name} already exists, and strict = true');
     }
     _colnames.add(name);
-    _data.add(new Column(x, name));
+    _data.add(Column(x, name));
   }
 
-  /**
-   * Add a row of data to this table. The keys of the Map [x] need to be a superset of the
-   * column names, but the order of the keys does not matter.  No checks are made if the
-   * types of the new row match the existing data in the table.
-   *
-   * If the table is empty, all the keys in the Map [x] will be added to the table.
-   *
-   */
+  /// Add a row of data to this table. The keys of the Map [x] need to be a superset of the
+  /// column names, but the order of the keys does not matter.  No checks are made if the
+  /// types of the new row match the existing data in the table.
+  ///
+  /// If the table is empty, all the keys in the Map [x] will be added to the table.
+  ///
   void addRow(Map x) {
     if (nrow == 0) {
       // you add all the Map to the table
       x.forEach((k, v) {
         _colnames.add(k);
-        _data.add(new Column([v], k));
+        _data.add(Column([v], k));
       });
     } else {
       colnames.forEach((name) {
@@ -167,47 +169,35 @@ class Table extends Object with IterableMixin<Map> {
     }
   }
 
-  /**
-   * Get the row i of the table as a Map.
-   */
+  /// Get the row i of the table as a Map.
   Map row(int i) {
-    Map res = {};
-    for (int j = 0; j < ncol; j++) res[_colnames[j]] = column(j).data[i];
+    var res = {};
+    for (var j = 0; j < ncol; j++) {
+      res[_colnames[j]] = column(j).data[i];
+    }
 
     return res;
   }
 
-  /**
-   * Get column i.
-   */
+  /// Get column i.
   Column column(int j) => _data[j];
 
   Column operator [](String columnName) => _data[_colnames.indexOf(columnName)];
 
-  /**
-   * Get the number of rows in the table.
-   */
+  /// Get the number of rows in the table.
   int get nrow => (_data.isEmpty) ? 0 : _data.first.data.length;
 
-  /**
-   * Get the number of columns in the table.
-   */
+  /// Get the number of columns in the table.
   int get ncol => (_colnames.isEmpty) ? 0 : _colnames.length;
 
-  /**
-   * Return the names of table columns as a List.
-   */
+  /// Return the names of table columns as a List.
   List<String> get colnames => _colnames;
 
-  /**
-   * Check if the table is empty.  You can have columns set up, but no data in them.
-   */
+  /// Check if the table is empty.  You can have columns set up, but no data in them.
   bool get isEmpty => (nrow == 0) ? true : false;
 
-  /**
-   * Change the name of column [i] to [name].
-   * Throws if name is already taken.
-   */
+  /// Change the name of column [i] to [name].
+  /// Throws if name is already taken.
   void setColname(int j, String name) {
     if (_colnames.contains(name)) {
       throw 'Column ${name} already exists';
@@ -215,10 +205,8 @@ class Table extends Object with IterableMixin<Map> {
     _colnames[j] = name;
   }
 
-  /**
-   * Apply function [f] to each column (or possibly to a subset of columns
-   * as specified by [columnNames]).
-   */
+  /// Apply function [f] to each column (or possibly to a subset of columns
+  /// as specified by [columnNames]).
   Table columnApply(Function f, {List<String> variableNames}) {
     if (variableNames == null) variableNames = _colnames;
 
@@ -231,47 +219,44 @@ class Table extends Object with IterableMixin<Map> {
     return res;
   }
 
-  /**
-   * Get the distinct rows in the table.
-   *
-   * You can restrict which columns you want to show the distinct values
-   * by specifying the [columnNames] list.
-   */
+  /// Get the distinct rows in the table.
+  ///
+  /// You can restrict which columns you want to show the distinct values
+  /// by specifying the [columnNames] list.
   Table distinct({List<String> columnNames}) {
-    var uRows = new LinkedHashSet(
+    var uRows = LinkedHashSet(
         equals: _rowEquality.equals,
         isValidKey: _rowEquality.isValidKey,
         hashCode: (e) => _rowEquality.hash(e));
     if (columnNames == null) {
-      for (int i = 0; i < nrow; i++) uRows.add(row(i));
+      for (var i = 0; i < nrow; i++) {
+        uRows.add(row(i));
+      }
     } else {
-      Map aux = {};
-      for (int i = 0; i < nrow; i++) {
-        Map rowi = row(i);
+      var aux = {};
+      for (var i = 0; i < nrow; i++) {
+        var rowi = row(i);
         columnNames.forEach((name) => aux[name] = rowi[name]);
         uRows.add(aux);
       }
     }
 
-    return new Table.from(uRows.toList());
+    return Table.from(uRows.toList());
   }
 
-  /**
-   * Make a copy of this table.
-   */
+  /// Make a copy of this table.
   Table copy() {
-    Table t = new Table();
-    for (int j = 0; j < ncol; j++)
-      t.addColumn(new List.from(column(j).data), name: colnames[j]);
+    var t = Table();
+    for (var j = 0; j < ncol; j++) {
+      t.addColumn(List.from(column(j).data), name: colnames[j]);
+    }
 
     return t;
   }
 
-  /**
-   * Column bind this table with another table.  Row numbers need to match.
-   * If a column in the other table has the same name as a column in this table,
-   * the column name gets prepended with '_Y'.
-   */
+  /// Column bind this table with another table.  Row numbers need to match.
+  /// If a column in the other table has the same name as a column in this table,
+  /// the column name gets prepended with '_Y'.
   Table cbind(Table other) {
     if (nrow != other.nrow)
       throw 'Cannot cbind as tables don\'t have the same number of rows!';
@@ -287,17 +272,15 @@ class Table extends Object with IterableMixin<Map> {
     return t;
   }
 
-  /**
-   * Row bind this table with another table.  It adds the observations from [other]
-   * after the observations of this table.
-   *
-   * If [strict] is `true`, the column names must match exactly.
-   *
-   * If [strict] is `false`, new columns are created as needed and filled with `null`s.
-   *
-   * The columns of the [other] table don't have to be in the same order as the columns
-   * of this table.
-   */
+  /// Row bind this table with another table.  It adds the observations from [other]
+  /// after the observations of this table.
+  ///
+  /// If [strict] is `true`, the column names must match exactly.
+  ///
+  /// If [strict] is `false`, new columns are created as needed and filled with `null`s.
+  ///
+  /// The columns of the [other] table don't have to be in the same order as the columns
+  /// of this table.
   Table rbind(Table other, {bool strict: true}) {
     if (strict &&
         !_setEquality.equals(colnames.toSet(), other.colnames.toSet()))
@@ -328,11 +311,9 @@ class Table extends Object with IterableMixin<Map> {
     return t;
   }
 
-  /**
-   * Do an outer join of this table with table [other] by columns
-   * that have the same name.
-   *
-   */
+  /// Do an outer join of this table with table [other] by columns
+  /// that have the same name.
+  ///
   Table joinTable(Table other, JoinType type) {
     List<String> by =
         colnames.toSet().intersection(other.colnames.toSet()).toList();
@@ -428,11 +409,9 @@ class Table extends Object with IterableMixin<Map> {
     return new Table.from(res);
   }
 
-  /**
-   * Utility to group rows by a given function.
-   */
+  /// Utility to group rows by a given function.
   Map _groupBy(Iterable x, Function f) {
-    Map result = new LinkedHashMap(
+    var result = LinkedHashMap(
         equals: _rowEquality.equals,
         isValidKey: _rowEquality.isValidKey,
         hashCode: (e) => _rowEquality.hash(e));
@@ -463,20 +442,18 @@ class Table extends Object with IterableMixin<Map> {
     return result;
   }
 
-  /**
-   * Apply function [f] to different groups of rows.  Rows are grouped
-   * by the distinct values of the columns indicated by [groupBy].
-   * If [groupBy] is not specified, the function [f] is applied to
-   * each individual row.
-   *
-   * Function [f] takes an [Iterable] and returns a Map with String keys.
-   * The Map returned by [f] will be used to construct the [Table] returned.
-   *
-   * For example to calculate the sum by the [groupBy] variables,
-   * ```
-   * Function f = (Iterable<num> x) => x.reduce((a,b) => {'sum': a+b});
-   * ```
-   */
+  /// Apply function [f] to different groups of rows.  Rows are grouped
+  /// by the distinct values of the columns indicated by [groupBy].
+  /// If [groupBy] is not specified, the function [f] is applied to
+  /// each individual row.
+  ///
+  /// Function [f] takes an [Iterable] and returns a Map with String keys.
+  /// The Map returned by [f] will be used to construct the [Table] returned.
+  ///
+  /// For example to calculate the sum by the [groupBy] variables,
+  /// ```
+  /// Function f = (Iterable<num> x) => x.reduce((a,b) => {'sum': a+b});
+  /// ```
   Table groupApply(dynamic f(Iterable<dynamic> x), {List<String> groupBy, List<String> variables}) {
     var by = groupBy.where((e) => colnames.contains(e)).toList();
     List<String> vars = variables.where((e) => colnames.contains(e)).toList();
