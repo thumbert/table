@@ -86,11 +86,13 @@ class Table extends Object with IterableMixin<Map> {
 
   /// Can control the formatting of double columns, for example give column
   /// with name 'A' you can specify
-  /// {'format': 'A': (double x) => x.toStringAsPrecision(5)}
-  Map<String, dynamic> options = <String, dynamic>{
+  /// {'format': 'A': (x) => (x as double).toStringAsPrecision(5)}
+  static final Map<String, dynamic> defaultOptions = <String, dynamic>{
     'columnSeparation': ' ',
     'format': <String, String Function(dynamic)>{},
   };
+
+  Map<String, dynamic> _options;
 
   /// Construct an empty (0 rows) table with columns.
   Table({List<String> colnames, Map<String,dynamic> options}) {
@@ -102,9 +104,16 @@ class Table extends Object with IterableMixin<Map> {
         _data.add(Column([], name));
       }
     }
-    options ??= this.options;
-    for (var key in options.keys) {
-      this.options[key] = options[key];
+    _options = defaultOptions;
+    if (options != null) setOptions(options);
+  }
+
+  Map<String,dynamic> get options => _options ?? defaultOptions;
+
+  /// Overwrite the default options with the keys available in [xs].
+  void setOptions (Map<String,dynamic> xs) {
+    for (var key in xs.keys) {
+      _options[key] = xs[key];
     }
   }
 
@@ -121,10 +130,8 @@ class Table extends Object with IterableMixin<Map> {
   ///
   Table.from(Iterable<Map> rows, {bool colnamesFromFirstRow = true,
     Map<String,dynamic> options}) {
-    options ??= this.options;
-    for (var key in options.keys) {
-      this.options[key] = options[key];
-    }
+    _options = defaultOptions;
+    if (options != null) setOptions(options);
     if (colnamesFromFirstRow) {
       _colnames = rows.first.keys.map((e) => e.toString()).toList();
     } else {
@@ -799,9 +806,9 @@ class Table extends Object with IterableMixin<Map> {
     var res = <String>[];
     for (var j = 0; j < ncol; j++) {
       List<String> aux;
-      if ((options['format'] as Map).containsKey(column(j).name)) {
+      if ((defaultOptions['format'] as Map).containsKey(column(j).name)) {
         aux = column(j)
-            ._paddedOutput(format: options['format'][column(j).name])
+            ._paddedOutput(format: defaultOptions['format'][column(j).name])
             .toList();
       } else {
         aux = column(j)._paddedOutput().toList();
@@ -811,7 +818,7 @@ class Table extends Object with IterableMixin<Map> {
       }
     }
     for (var i = 0; i < nrow + 1; i++) {
-      res.add(out[i].join(options['columnSeparation']));
+      res.add(out[i].join(defaultOptions['columnSeparation']));
     }
     return res.join('\n');
   }
