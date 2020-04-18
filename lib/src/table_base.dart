@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:more/ordering.dart';
 import 'package:csv/csv.dart';
+import 'package:table/table.dart';
 
 enum JoinType { outer, left, right, inner }
 
@@ -16,6 +17,8 @@ class Column<E> {
   List<E> data;
   String name;
 
+  static int defaultDisplayDigits = 6;
+
   Column(this.data, this.name);
 
   E operator [](int i) => data[i];
@@ -24,14 +27,39 @@ class Column<E> {
 
   List toList() => data;
 
-  Iterable<String> _paddedOutput() {
-    var aux = [name, ...data.map((e) => e.toString())];
+
+  /// For a numeric column, you can use custom formatting:
+  /// (e) => e.toStringAsFixed(3);
+  Iterable<String> _paddedOutput({String Function(E) format}) {
+    List<String> aux;
+    if (data.first is double && format == null) {
+      /// check if it has fewer decimals than the defaultDisplayDigits
+      /// calculate the number of zeros, and define a format function.
+      format = (e) => (e as double).toStringAsFixed(defaultDisplayDigits);
+      var nZeros = data.fold(defaultDisplayDigits, (prev, e) => min(prev as int,
+          _trailingZeros(format(e))));
+      if (nZeros > 0) {
+        format = (e) => (e as double).toStringAsFixed(defaultDisplayDigits-nZeros);
+      }
+    }
+    format ??= (e) => e.toString();
+    aux = [name, ...data.map(format)];
     var width = aux.fold(0, (prev, e) => max(prev as int, e.length));
     return aux.map((String e) => e.padLeft(width));
   }
 
   @override
   String toString() => _paddedOutput().join('\n');
+
+  /// Count the number of zeros from the end of the string to the decimal point.
+  int _trailingZeros(String x) {
+    var n = x.length - 1;
+    while ( x[n] != '.' && x[n] == '0') {
+      n--;
+    }
+    return x.length - 1 - n;
+  }
+
 }
 
 /// A tabular view of columnar data iterable by row.  A table holds observations
@@ -47,6 +75,9 @@ class Column<E> {
 ///
 /// The null value is used to indicate missing data only.
 ///
+/// Customize the digits display in the [toString] method with
+/// [options['display']][['digits']] for doubles.
+///
 class Table extends Object with IterableMixin<Map> {
   List<Column> _data = <Column>[];
   List<String> _colnames = <String>[];
@@ -54,8 +85,10 @@ class Table extends Object with IterableMixin<Map> {
   static const _setEquality = SetEquality();
   static var _fillValue;
 
+  Map<String,dynamic> options;
+
   /// Construct an empty (0 rows) table with columns.
-  Table({List<String> colnames}) {
+  Table({List<String> colnames, this.options}) {
     _data = <Column>[];
     _colnames = <String>[];
     if (colnames != null) {
@@ -64,6 +97,8 @@ class Table extends Object with IterableMixin<Map> {
         _data.add(Column([], name));
       }
     }
+
+    options= <String,dynamic>{'display': {'digits': 3}};
   }
 
   /// Generate a table from an iterable of rows.  Each element of the iterable is a Map.
@@ -84,12 +119,12 @@ class Table extends Object with IterableMixin<Map> {
       // it's easiest to traverse twice -- unfortunately
       var _names = <String>{};
       rows.forEach((Map row) =>
-        _names = _names.union(row.keys.map((e) => e.toString()).toSet()));
+          _names = _names.union(row.keys.map((e) => e.toString()).toSet()));
       _colnames = _names.toList();
     }
     _colnames.forEach((name) => _data.add(Column([], name)));
-    var _ind = Map.fromIterables(
-        _colnames, List.generate(_colnames.length, (i) => i));
+    var _ind =
+        Map.fromIterables(_colnames, List.generate(_colnames.length, (i) => i));
 
     if (_fillValue == null) {
       rows.forEach((Map row) {
@@ -454,7 +489,8 @@ class Table extends Object with IterableMixin<Map> {
   /// ```
   /// Function f = (Iterable<num> x) => x.reduce((a,b) => {'sum': a+b});
   /// ```
-  Table groupApply(dynamic f(Iterable<dynamic> x), {List<String> groupBy, List<String> variables}) {
+  Table groupApply(dynamic f(Iterable<dynamic> x),
+      {List<String> groupBy, List<String> variables}) {
     var by = groupBy.where((e) => colnames.contains(e)).toList();
     List<String> vars = variables.where((e) => colnames.contains(e)).toList();
     Map _colIndex = new Map.fromIterables(
@@ -581,8 +617,8 @@ class Table extends Object with IterableMixin<Map> {
    */
   Table order(Map<String, int> orderBy,
       {NullOrdering nullOrdering: NullOrdering.first}) {
-     var keys = orderBy.keys.toList();
-     Ordering ord;
+    var keys = orderBy.keys.toList();
+    Ordering ord;
 
 //     keys.forEach((String name) {
 //       if (!colnames.contains(name)) throw 'Column name $name does not exist.';
@@ -639,29 +675,27 @@ class Table extends Object with IterableMixin<Map> {
     return new Table.from(t.where((Map row) => row['value'] != null));
   }
 
-  /**
-   * Reshape (pivot) a table (with a summary function).  The [vertical] list indicates the
-   * variables that will remain along the rows.  The variables in the [horizontal]
-   * list will be transposed and the unique values will become columns.
-   *
-   * The summary function [f] takes an `Iterable` and returns a value.
-   *
-   * For example, to pivot this 4 rows and 3 columns table
-   * ```
-   * [{'code': 'BOS', 'month': 'Jan', 'value': 10},
-   * {'code': 'BOS', 'month': 'Feb', 'value': 20},
-   * {'code': 'BOS', 'month': 'Mar', 'value': 30},
-   * {'code': 'LAX', 'month': 'Jan', 'value': 40}]
-   * ```
-   * by calling `cast(['code'], ['month'], (x) => x.first)`
-   * you get a table with 2 rows and 4 columns
-   * ```
-   * [{'code': 'BOS', 'Jan': 10, 'Feb': 20, 'Mar': 30},
-   *  {'code': 'LAX', 'Jan': 40, 'Feb': null, 'Mar': null}].
-   *```
-   * Missing values are filled with `null`s by default, unless specified by
-   * the `fill` argument.
-   */
+  /// Reshape (pivot) a table (with a summary function).  The [vertical] list indicates the
+  /// variables that will remain along the rows.  The variables in the [horizontal]
+  /// list will be transposed and the unique values will become columns.
+  ///
+  /// The summary function [f] takes an `Iterable` and returns a value.
+  ///
+  /// For example, to pivot this 4 rows and 3 columns table
+  /// ```
+  /// [{'code': 'BOS', 'month': 'Jan', 'value': 10},
+  /// {'code': 'BOS', 'month': 'Feb', 'value': 20},
+  /// {'code': 'BOS', 'month': 'Mar', 'value': 30},
+  /// {'code': 'LAX', 'month': 'Jan', 'value': 40}]
+  /// ```
+  /// by calling `cast(['code'], ['month'], (x) => x.first)`
+  /// you get a table with 2 rows and 4 columns
+  /// ```
+  /// [{'code': 'BOS', 'Jan': 10, 'Feb': 20, 'Mar': 30},
+  ///  {'code': 'LAX', 'Jan': 40, 'Feb': null, 'Mar': null}].
+  ///```
+  /// Missing values are filled with `null`s by default, unless specified by
+  /// the `fill` argument.
   Table reshape(List<String> vertical, List<String> horizontal, Function f,
       {String variable: 'value', fill: null}) {
     List<String> grp = new List.from(vertical)..addAll(horizontal);
@@ -685,7 +719,8 @@ class Table extends Object with IterableMixin<Map> {
     // the horizontal columns may need to be joined
     List<String> horizontalVals = [];
     if (horizontal.length == 1) {
-      horizontalVals = this[horizontal.first].data.map((e) => e.toString()).toList();
+      horizontalVals =
+          this[horizontal.first].data.map((e) => e.toString()).toList();
     } else {
       this.forEach((row) {
         String str = horizontal.map((name) => row[name]).join('_');
@@ -703,7 +738,7 @@ class Table extends Object with IterableMixin<Map> {
     });
 
     if (fill != null) _fillValue = fill;
-    Table t = new Table.from(res, colnamesFromFirstRow: false);
+    var t = Table.from(res, colnamesFromFirstRow: false);
 
     if (fill != null) _fillValue = null; // restore the default
     return t;
@@ -712,8 +747,8 @@ class Table extends Object with IterableMixin<Map> {
   /// Remove the column with name [columnName] from the table.  Returns true
   /// if the [columnName] was a column name, false otherwise.
   bool removeColumn(String columnName) {
-    bool res = false;
-    int ind = _colnames.indexOf(columnName);
+    var res = false;
+    var ind = _colnames.indexOf(columnName);
     if (ind != -1) {
       _colnames.removeAt(ind);
       _data.removeAt(ind);
@@ -725,62 +760,67 @@ class Table extends Object with IterableMixin<Map> {
 
   /// Remove the row with index [i].  Return true if successful, false if not.
   bool removeRow(int i) {
-    bool res = true;
+    var res = true;
     if (i > nrow || i < 0) {
       res = false;
     } else {
-      for (int j = 0; j < ncol; j++) column(j).data.removeAt(i);
+      for (var j = 0; j < ncol; j++) {
+        column(j).data.removeAt(i);
+      }
     }
     return res;
   }
 
   /// Output the table as a CSV string.
   String toCsv() {
-    List<List> rows = new List.generate(nrow+1, (i) => []);
-    rows[0] = new List.from(colnames);
-    for (int j = 0; j < ncol; j++) {
+    var rows = List.generate(nrow + 1, (i) => []);
+    rows[0] = List.from(colnames);
+    for (var j = 0; j < ncol; j++) {
       var cj = column(j);
-      for (int i = 0; i < nrow; i++) {
-        rows[i+1].add(cj[i]);
+      for (var i = 0; i < nrow; i++) {
+        rows[i + 1].add(cj[i]);
       }
     }
     return const ListToCsvConverter().convert(rows);
   }
 
   /// Column aligned toString output.
+  @override
   String toString() {
-    List<List<String>> out =
-        new List.generate(nrow + 1, (i) => new List.filled(ncol, ''));
-    List<String> res = [];
-    for (int j = 0; j < ncol; j++) {
+    var out = List.generate(nrow + 1, (i) => List.filled(ncol, ''));
+    var res = <String>[];
+    for (var j = 0; j < ncol; j++) {
       var aux = column(j)._paddedOutput().toList();
-      for (int i = 0; i < nrow + 1; i++) out[i][j] = aux[i];
+      for (var i = 0; i < nrow + 1; i++) {
+        out[i][j] = aux[i];
+      }
     }
-    for (int i = 0; i < nrow + 1; i++) res.add(out[i].join(' '));
+    for (var i = 0; i < nrow + 1; i++) {
+      res.add(out[i].join(' '));
+    }
     return res.join('\n');
   }
 
   /// Return the first [n] rows of this table as another table.
-  Table head({int n: 6}) => new Table.from(this.take(n));
+  Table head({int n = 6}) => Table.from(take(n));
 
   /// Sample [n] rows from this table and return it as another table.
-  Table sample({int n: 6}) {
-    Random rand = new Random();
+  Table sample({int n = 6}) {
+    var rand = Random();
     var res = <Map>[];
-    for (int i = 0; i < n; i++) {
+    for (var i = 0; i < n; i++) {
       res.add(row(rand.nextInt(nrow)));
     }
-    return new Table.from(res);
+    return Table.from(res);
   }
 
   /// Make unique column name (in case there are collisions.)  The name is
   /// in the form 'V{number}'.
   String _makeColumnName(int n) {
-    String proposed = 'V${n}';
+    var proposed = 'V${n}';
     if (colnames.contains(proposed)) {
       proposed = _makeColumnName(n + 1);
     }
-
     return proposed;
   }
 }
@@ -789,15 +829,16 @@ class _TableIterator extends Iterator<Map> {
   Map _current;
   int ind;
   int nrow;
-  Table _table;
+  final Table _table;
 
-  _TableIterator(Table this._table) {
+  _TableIterator(this._table) {
     nrow = _table.nrow;
     ind = 0;
   }
 
+  @override
   bool moveNext() {
-    bool res = true;
+    var res = true;
     if (ind == nrow) {
       res = false;
     } else {
@@ -808,5 +849,6 @@ class _TableIterator extends Iterator<Map> {
     return res;
   }
 
+  @override
   Map get current => _current;
 }

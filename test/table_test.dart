@@ -3,13 +3,27 @@
 
 library table.test;
 
+import 'dart:math';
+
 import 'package:test/test.dart';
 import 'package:table/table.dart';
 
 void column_test() {
-  test('print column', () {
+  test('print column, string', () {
     var c = Column(['BWI', 'BOS', 'DC'], 'airport');
     expect(c.toString(), 'airport\n    BWI\n    BOS\n     DC');
+  });
+  test('print column, integer', () {
+    var c = Column([1, 2, 100], 'index');
+    expect(c.toString(), 'index\n    1\n    2\n  100');
+  });
+  test('print column, double', () {
+    var c = Column([sqrt(2), pi, 100.0], 'value');
+    expect(c.toString(), '     value\n  1.414214\n  3.141593\n100.000000');
+  });
+  test('print column, double with few decimals', () {
+    var c = Column([14.5, 2.4, 100.0], 'value');
+    expect(c.toString(), 'value\n 14.5\n  2.4\n100.0');
   });
 }
 
@@ -128,7 +142,7 @@ void table_simple() {
       equals(t2.nrow, 2);
     });
 
-    test('print table', () {
+    test('print table, simple', () {
       var rows = <Map>[
         {'code': 'BOS', 'value': 2},
         {'code': 'BOS', 'value': 4}
@@ -137,13 +151,22 @@ void table_simple() {
       expect(t.toString(), 'code value\n BOS     2\n BOS     4');
     });
 
+    test('print table, different column types', () {
+      var rows = <Map>[
+        {'tree': 'Oak',   'age': 2.5, 'diameter': 10.001},
+        {'tree': 'Maple', 'age': 4.1, 'diameter': 13.452},
+      ];
+      var t = Table.from(rows);
+      expect(t.toString(),
+          ' tree age diameter\n  Oak 2.5   10.001\nMaple 4.1   13.452');
+    });
+
     test('table toCsv()', () {
       var rows = <Map>[
         {'code': 'BOS', 'value': 2},
         {'code': 'ATL', 'value': 4}
       ];
       var t = Table.from(rows);
-      //print(t.toCsv());
       expect(t.toCsv(), 'code,value\r\nBOS,2\r\nATL,4');
     });
 
