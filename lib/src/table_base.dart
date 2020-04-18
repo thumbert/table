@@ -27,7 +27,6 @@ class Column<E> {
 
   List toList() => data;
 
-
   /// For a numeric column, you can use custom formatting:
   /// (e) => e.toStringAsFixed(3);
   Iterable<String> _paddedOutput({String Function(E) format}) {
@@ -36,10 +35,11 @@ class Column<E> {
       /// check if it has fewer decimals than the defaultDisplayDigits
       /// calculate the number of zeros, and define a format function.
       format = (e) => (e as double).toStringAsFixed(defaultDisplayDigits);
-      var nZeros = data.fold(defaultDisplayDigits, (prev, e) => min(prev as int,
-          _trailingZeros(format(e))));
+      var nZeros = data.fold(defaultDisplayDigits,
+          (prev, e) => min(prev as int, _trailingZeros(format(e))));
       if (nZeros > 0) {
-        format = (e) => (e as double).toStringAsFixed(defaultDisplayDigits-nZeros);
+        format =
+            (e) => (e as double).toStringAsFixed(defaultDisplayDigits - nZeros);
       }
     }
     format ??= (e) => e.toString();
@@ -54,12 +54,11 @@ class Column<E> {
   /// Count the number of zeros from the end of the string to the decimal point.
   int _trailingZeros(String x) {
     var n = x.length - 1;
-    while ( x[n] != '.' && x[n] == '0') {
+    while (x[n] != '.' && x[n] == '0') {
       n--;
     }
     return x.length - 1 - n;
   }
-
 }
 
 /// A tabular view of columnar data iterable by row.  A table holds observations
@@ -85,10 +84,16 @@ class Table extends Object with IterableMixin<Map> {
   static const _setEquality = SetEquality();
   static var _fillValue;
 
-  Map<String,dynamic> options;
+  /// Can control the formatting of double columns, for example give column
+  /// with name 'A' you can specify
+  /// {'format': 'A': (double x) => x.toStringAsPrecision(5)}
+  Map<String, dynamic> options = <String, dynamic>{
+    'columnSeparation': ' ',
+    'format': <String, String Function(dynamic)>{},
+  };
 
   /// Construct an empty (0 rows) table with columns.
-  Table({List<String> colnames, this.options}) {
+  Table({List<String> colnames, Map<String,dynamic> options}) {
     _data = <Column>[];
     _colnames = <String>[];
     if (colnames != null) {
@@ -97,8 +102,10 @@ class Table extends Object with IterableMixin<Map> {
         _data.add(Column([], name));
       }
     }
-
-    options= <String,dynamic>{'display': {'digits': 3}};
+    options ??= this.options;
+    for (var key in options.keys) {
+      this.options[key] = options[key];
+    }
   }
 
   /// Generate a table from an iterable of rows.  Each element of the iterable is a Map.
@@ -112,7 +119,12 @@ class Table extends Object with IterableMixin<Map> {
   /// Missing data for a column will be assigned `null`.
   ///
   ///
-  Table.from(Iterable<Map> rows, {bool colnamesFromFirstRow = true}) {
+  Table.from(Iterable<Map> rows, {bool colnamesFromFirstRow = true,
+    Map<String,dynamic> options}) {
+    options ??= this.options;
+    for (var key in options.keys) {
+      this.options[key] = options[key];
+    }
     if (colnamesFromFirstRow) {
       _colnames = rows.first.keys.map((e) => e.toString()).toList();
     } else {
@@ -144,21 +156,21 @@ class Table extends Object with IterableMixin<Map> {
   /// The columns can have different number of elements.
   Table.fromCartesianProduct(List<Column> columns) {
     _colnames = columns.map((e) => e.name).toList();
-    int N = columns.fold(1, (a, Column b) => a * b.data.length);
+    var N = columns.fold(1, (a, Column b) => (a as int) * b.data.length);
     // how many times I repeat each element of the columns
-    List<int> nEach = columns.map((e) {
+    var nEach = columns.map((e) {
       N ~/= e.data.length;
       return N;
     }).toList();
 
-    for (int j = 0; j < ncol; j++) {
-      Iterable block =
-          columns[j].data.expand((e) => new List.generate(nEach[j], (i) => e));
+    for (var j = 0; j < ncol; j++) {
+      var block =
+          columns[j].data.expand((e) => List.generate(nEach[j], (i) => e));
       // how many times you repeat the block
-      int nReps = columns.take(j).fold(1, (a, Column b) => a * b.data.length);
-      List cj = [];
-      new List.generate(nReps, (i) => block).forEach((e) => cj.addAll(e));
-      _data.add(new Column(cj, columns[j].name));
+      var nReps = columns.take(j).fold(1, (a, Column b) => a * b.data.length);
+      var cj = [];
+      List.generate(nReps, (i) => block).forEach((e) => cj.addAll(e));
+      _data.add(Column(cj, columns[j].name));
     }
   }
 
@@ -322,24 +334,24 @@ class Table extends Object with IterableMixin<Map> {
       throw 'Cannot rbind because columns don\'t match and strict is true';
 
     // columns in other that are not in this table
-    Set<String> notInTable = other.colnames.toSet();
+    var notInTable = other.colnames.toSet();
 
-    Table t = copy();
-    for (int j = 0; j < ncol; j++) {
-      String name = colnames[j];
+    var t = copy();
+    for (var j = 0; j < ncol; j++) {
+      var name = colnames[j];
       if (other.colnames.contains(name)) {
         // column exists in the other table
-        t[name].data..addAll(new List.from(other[name].data));
+        t[name].data..addAll(List.from(other[name].data));
         notInTable.remove(name);
       } else {
         // column does not exist in the other table
         // need to fill with nulls
-        t[name].data..addAll(new List.filled(other.nrow, null));
+        t[name].data..addAll(List.filled(other.nrow, null));
       }
     }
     // there may be columns in other table that are not in this table
-    for (String name in notInTable) {
-      List x = new List.generate(nrow, (i) => null)..addAll(other[name].data);
+    for (var name in notInTable) {
+      List x = List.generate(nrow, (i) => null)..addAll(other[name].data);
       t.addColumn(x, name: name);
     }
 
@@ -570,26 +582,26 @@ class Table extends Object with IterableMixin<Map> {
 //    return new Table.from(res);
 //  }
 
-  /**
-   * Apply function [f] on a list of [variables] to [width] observations
-   * at a time.
-   *
-   * For example, this method is convenient to calculate moving averages
-   * if the observations of the table are ordered by time.
-   *
-   *
-   */
+  /// Apply function [f] on a list of [variables] to [width] observations
+  /// at a time.
+  ///
+  /// For example, this method is convenient to calculate moving averages
+  /// if the observations of the table are ordered by time.
+  ///
+  ///
   List rollApply(String variable, int width, Function f,
-      {AlignType align: AlignType.last}) {
-    if (width % 2 == 0 && align == AlignType.center)
+      {AlignType align = AlignType.last}) {
+    if (width % 2 == 0 && align == AlignType.center) {
       throw 'ALIGN_TYPE.CENTER does not work for an even width.';
+    }
 
-    int iEnd = width;
-    List res = [];
-    if (align == AlignType.last)
-      res.addAll(new List.filled(width - 1, null));
-    else if (align == AlignType.center)
-      res.addAll(new List.filled(width ~/ 2, null));
+    var iEnd = width;
+    var res = [];
+    if (align == AlignType.last) {
+      res.addAll(List.filled(width - 1, null));
+    } else if (align == AlignType.center) {
+      res.addAll(List.filled(width ~/ 2, null));
+    }
 
     while (iEnd <= nrow) {
       res.add(f(this[variable].data.sublist(iEnd - width, iEnd)));
@@ -604,17 +616,15 @@ class Table extends Object with IterableMixin<Map> {
     return res;
   }
 
-  /**
-   * Order the rows of the table with a natural order for some column names.
-   * [orderBy] is a Map with the column name as the key and with the value either 1
-   * (if the ordering is from lowest to highest) or -1 (if the ordering is to be done
-   * from highest to lowest).
-   *
-   * For example, [orderBy = {'id': 1, 'code':-1}] will sort ascendingly on
-   * column [id] and descendingly on column [code].
-   *
-   * Return a new table.
-   */
+  /// Order the rows of the table with a natural order for some column names.
+  /// [orderBy] is a Map with the column name as the key and with the value either 1
+  /// (if the ordering is from lowest to highest) or -1 (if the ordering is to be done
+  /// from highest to lowest).
+  ///
+  /// For example, [orderBy = {'id': 1, 'code':-1}] will sort ascendingly on
+  /// column [id] and descendingly on column [code].
+  ///
+  /// Return a new table.
   Table order(Map<String, int> orderBy,
       {NullOrdering nullOrdering: NullOrdering.first}) {
     var keys = orderBy.keys.toList();
@@ -648,31 +658,29 @@ class Table extends Object with IterableMixin<Map> {
   Table orderWith(Ordering ordering) =>
       new Table.from(ordering.sorted(this) as List<Map>);
 
-  /**
-   * A melt method similar to the R reshape package.
-   * It reshapes the table into a long form, one row for all id variables and one
-   * measurement variable with the value of the measured variable.
-   * The [List<String> id] is the list of column names for the id variables.
-   *
-   * See http://had.co.nz/reshape/
-   */
+  /// A melt method similar to the R reshape package.
+  /// It reshapes the table into a long form, one row for all id variables and one
+  /// measurement variable with the value of the measured variable.
+  /// The [List<String> id] is the list of column names for the id variables.
+  ///
+  /// See http://had.co.nz/reshape/
   Table melt(List<String> id) {
-    Table t = new Table();
-    List<String> variables =
+    var t = Table();
+    var variables =
         colnames.where((String name) => !id.contains(name)).toList();
-    int N = nrow;
-    Table idTable = new Table();
+    var N = nrow;
+    var idTable = Table();
     id.forEach((String name) => idTable.addColumn(this[name].data, name: name));
 
-    for (String variable in variables) {
-      Table block = idTable.copy();
-      block.addColumn(new List.filled(N, variable), name: 'variable');
+    for (var variable in variables) {
+      var block = idTable.copy();
+      block.addColumn(List.filled(N, variable), name: 'variable');
       block.addColumn(this[variable].data, name: 'value');
       t = t.rbind(block, strict: false);
     }
 
     // remove the null values from the melted table
-    return new Table.from(t.where((Map row) => row['value'] != null));
+    return Table.from(t.where((Map row) => row['value'] != null));
   }
 
   /// Reshape (pivot) a table (with a summary function).  The [vertical] list indicates the
@@ -790,13 +798,20 @@ class Table extends Object with IterableMixin<Map> {
     var out = List.generate(nrow + 1, (i) => List.filled(ncol, ''));
     var res = <String>[];
     for (var j = 0; j < ncol; j++) {
-      var aux = column(j)._paddedOutput().toList();
+      List<String> aux;
+      if ((options['format'] as Map).containsKey(column(j).name)) {
+        aux = column(j)
+            ._paddedOutput(format: options['format'][column(j).name])
+            .toList();
+      } else {
+        aux = column(j)._paddedOutput().toList();
+      }
       for (var i = 0; i < nrow + 1; i++) {
         out[i][j] = aux[i];
       }
     }
     for (var i = 0; i < nrow + 1; i++) {
-      res.add(out[i].join(' '));
+      res.add(out[i].join(options['columnSeparation']));
     }
     return res.join('\n');
   }

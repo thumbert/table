@@ -161,6 +161,22 @@ void table_simple() {
           ' tree age diameter\n  Oak 2.5   10.001\nMaple 4.1   13.452');
     });
 
+    test('print table, custom format', () {
+      var rows = <Map>[
+        {'int': 1, 'value': sqrt(1)},
+        {'int': 2, 'value': sqrt2},
+      ];
+      var options = {
+        'columnSeparation': '  ',
+        'format': {'value': (e) => (e as double).toStringAsPrecision(6)},
+      };
+      var t = Table.from(rows, options: options);
+      print(t);
+      expect(t.toString(),
+          'int    value\n  1  1.00000\n  2  1.41421');
+    });
+
+
     test('table toCsv()', () {
       var rows = <Map>[
         {'code': 'BOS', 'value': 2},
