@@ -5,7 +5,6 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:more/ordering.dart';
 import 'package:csv/csv.dart';
-import 'package:table/table.dart';
 
 enum JoinType { outer, left, right, inner }
 
