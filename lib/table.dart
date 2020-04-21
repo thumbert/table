@@ -16,5 +16,4 @@ export 'src/rename_columns.dart';
 export 'src/reorder_columns.dart';
 export 'src/reshape.dart';
 export 'src/collapse_list_of_map.dart';
-export 'src/table_base.dart';
 export 'src/unique.dart';

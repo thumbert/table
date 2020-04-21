@@ -6,7 +6,7 @@ library table.test;
 import 'dart:math';
 
 import 'package:test/test.dart';
-import 'package:table/table.dart';
+import 'package:table/table_base.dart';
 
 void column_test() {
   test('print column, string', () {
