@@ -1,6 +1,6 @@
 library expand_map_of_list;
 
-import 'package:table/src/collapse_list_of_map.dart';
+import 'collapse_list_of_map.dart';
 
 /// Go from a map of [List]s to a list of [Map]s.  This function is the opposite 
 /// of [collapseListOfMap].
@@ -20,12 +20,13 @@ List<Map<String,dynamic>> expandMapOfList(Map<String,List> x,
     {List<String> columns}) {
   columns ??= x.keys.toList();
   var out = <Map<String,dynamic>>[];
-  int n = x[columns.first].length;
+  var n = x[columns.first].length;
   var equalLengths = x.values.map((e) => e.length).every((e) => e == n);
-  if (!equalLengths)
+  if (!equalLengths) {
     throw ArgumentError('Not all keys have the same number of elements.');
+  }
 
-  for (int i=0; i<n; i++) {
+  for (var i=0; i<n; i++) {
     var values = [];
     for (var column in columns) {
       values.add(x[column][i]);

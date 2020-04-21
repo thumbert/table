@@ -23,8 +23,9 @@ Map<String, List> collapseListOfMap(List<Map<String,dynamic>> xs,
       List.generate(columns.length, (i) => []));
   for (var x in xs) {
     for (var column in columns) {
-      if (!x.containsKey(column))
+      if (!x.containsKey(column)) {
         throw ArgumentError('Row $x does not contain column $column');
+      }
       out[column].add(x[column]);
     }
   }

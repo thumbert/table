@@ -8,8 +8,9 @@ List<Map<String, dynamic>> reorderColumns(
   for (var x in xs) {
     var row = <String, dynamic>{};
     for (var name in columnNames) {
-      if (!x.containsKey(name))
+      if (!x.containsKey(name)) {
         throw ArgumentError('Column $name doesn\'t exist in $x');
+      }
       row[name] = x[name];
     }
     out.add(row);

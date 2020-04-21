@@ -60,13 +60,13 @@ List<Map> reshape(List<Map<String, dynamic>> xs, List<String> rows,
 /// Function [f] takes an element of the iterable and returns a grouping value.
 /// In this case the Iterable x is the actual table.
 Map<dynamic, List<int>> _groupByIndex(Iterable x, Function f) {
-  const _rowEquality = const MapEquality();
-  Map<dynamic, List<int>> result = new LinkedHashMap(
+  const _rowEquality = MapEquality();
+  Map<dynamic, List<int>> result = LinkedHashMap(
       equals: _rowEquality.equals,
       isValidKey: _rowEquality.isValidKey,
       hashCode: (e) => _rowEquality.hash(e));
 
-  int ind = 0;
+  var ind = 0;
   x.forEach((row) {
     result.putIfAbsent(f(row), () => []).add(ind);
     ind += 1;

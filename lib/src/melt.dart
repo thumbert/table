@@ -1,4 +1,4 @@
-library melt.dart;
+library melt;
 
 /// Use this function to bring a data set into a database first normal form.
 /// See https://en.wikipedia.org/wiki/First_normal_form.
