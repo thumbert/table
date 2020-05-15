@@ -33,12 +33,12 @@ class Column<E> {
     if (data.first is double && format == null) {
       /// check if it has fewer decimals than the defaultDisplayDigits
       /// calculate the number of zeros, and define a format function.
-      format = (e) => (e as double).toStringAsFixed(defaultDisplayDigits);
+      format = (e) => (e as num).toDouble().toStringAsFixed(defaultDisplayDigits);
       var nZeros = data.fold(defaultDisplayDigits,
           (prev, e) => min(prev as int, _trailingZeros(format(e))));
       if (nZeros > 0) {
         format =
-            (e) => (e as double).toStringAsFixed(defaultDisplayDigits - nZeros);
+            (e) => (e as num).toDouble().toStringAsFixed(defaultDisplayDigits - nZeros);
       }
     }
     format ??= (e) => e.toString();
