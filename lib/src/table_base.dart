@@ -15,10 +15,14 @@ enum NullOrdering { first, last }
 class Column<E> {
   List<E> data;
   String name;
+  /// The width of the column.  If not specified, it is computed from the data
+  /// so that all the data fits.
+  int width;
 
   static int defaultDisplayDigits = 6;
 
-  Column(this.data, this.name);
+  /// Column data is aligned right (same as in an R data frame)
+  Column(this.data, this.name, {this.width});
 
   E operator [](int i) => data[i];
 
@@ -43,7 +47,7 @@ class Column<E> {
     }
     format ??= (e) => e.toString();
     aux = [name, ...data.map(format)];
-    var width = aux.fold(0, (prev, e) => max(prev as int, e.length));
+    width ??= aux.fold(0, (prev, e) => max(prev, e.length));
     return aux.map((String e) => e.padLeft(width));
   }
 
@@ -89,6 +93,7 @@ class Table extends Object with IterableMixin<Map> {
   static final Map<String, dynamic> defaultOptions = <String, dynamic>{
     'columnSeparation': ' ',
     'format': <String, String Function(dynamic)>{},
+    'columnWidth': <String,int>{},
   };
 
   Map<String, dynamic> _options;
@@ -140,7 +145,13 @@ class Table extends Object with IterableMixin<Map> {
           _names = _names.union(row.keys.map((e) => e.toString()).toSet()));
       _colnames = _names.toList();
     }
-    _colnames.forEach((name) => _data.add(Column([], name)));
+    for (var name in _colnames) {
+      var column = Column([], name);
+      if (_options['columnWidth'].containsKey(name)) {
+        column..width = _options['columnWidth'][name];
+      }
+      _data.add(column);
+    }
     var _ind =
         Map.fromIterables(_colnames, List.generate(_colnames.length, (i) => i));
 
@@ -336,8 +347,9 @@ class Table extends Object with IterableMixin<Map> {
   /// of this table.
   Table rbind(Table other, {bool strict: true}) {
     if (strict &&
-        !_setEquality.equals(colnames.toSet(), other.colnames.toSet()))
+        !_setEquality.equals(colnames.toSet(), other.colnames.toSet())) {
       throw 'Cannot rbind because columns don\'t match and strict is true';
+    }
 
     // columns in other that are not in this table
     var notInTable = other.colnames.toSet();

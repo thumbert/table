@@ -25,6 +25,15 @@ void column_test() {
     var c = Column([14.5, 2.4, 100.0], 'value');
     expect(c.toString(), 'value\n 14.5\n  2.4\n100.0');
   });
+  test('column with specified width', () {
+    var c = Column(['Ohio', 'Maryland', 'Arizona'], 'state', width: 15);
+    expect(
+        c.toString(),
+        '          state\n'
+        '           Ohio\n'
+        '       Maryland\n'
+        '        Arizona');
+  });
 }
 
 void table_simple() {
@@ -108,6 +117,65 @@ void table_simple() {
       //print(t);
     });
 
+    test('print table, simple', () {
+      var rows = <Map>[
+        {'code': 'BOS', 'value': 2},
+        {'code': 'BOS', 'value': 4}
+      ];
+      var t = Table.from(rows);
+      expect(t.toString(), 'code value\n BOS     2\n BOS     4');
+    });
+
+    test('print table, different column types', () {
+      var rows = <Map>[
+        {'tree': 'Oak', 'age': 2.5, 'diameter': 10.001},
+        {'tree': 'Maple', 'age': 4.1, 'diameter': 13.452},
+      ];
+      var t = Table.from(rows);
+      expect(t.toString(),
+          ' tree age diameter\n  Oak 2.5   10.001\nMaple 4.1   13.452');
+    });
+
+    test('print table, custom format', () {
+      var rows = <Map>[
+        {'int': 1, 'value': sqrt(1)},
+        {'int': 2, 'value': sqrt2},
+      ];
+      var options = {
+        'columnSeparation': '  ',
+        'format': {'value': (e) => (e as double).toStringAsPrecision(6)},
+      };
+      var t = Table.from(rows, options: options);
+      expect(t.toString(), 'int    value\n  1  1.00000\n  2  1.41421');
+    });
+
+    test('print table, custom format and columnWidth', () {
+      var rows = <Map>[
+        {'state': 'Ohio', 'value': sqrt(1)},
+        {'state': 'Maryland', 'value': sqrt2},
+      ];
+      var options = {
+        'columnSeparation': '  ',
+        'format': {'value': (e) => (e as double).toStringAsPrecision(6)},
+        'columnWidth': {'state': 15},
+      };
+      var t = Table.from(rows, options: options);
+      expect(t.toString(),
+              '          state    value\n'
+              '           Ohio  1.00000\n'
+              '       Maryland  1.41421');
+    });
+
+    test('table toCsv()', () {
+      var rows = <Map>[
+        {'code': 'BOS', 'value': 2},
+        {'code': 'ATL', 'value': 4}
+      ];
+      var t = Table.from(rows);
+      expect(t.toCsv(), 'code,value\r\nBOS,2\r\nATL,4');
+    });
+
+
     test('row iterator', () {
       var t = Table()
         ..addColumn(['BWI', 'BWI', 'BOS'], name: 'code')
@@ -140,50 +208,6 @@ void table_simple() {
       expect(t.nrow, 3);
       var t2 = Table.from(rows).distinct(columnNames: ['code']);
       equals(t2.nrow, 2);
-    });
-
-    test('print table, simple', () {
-      var rows = <Map>[
-        {'code': 'BOS', 'value': 2},
-        {'code': 'BOS', 'value': 4}
-      ];
-      var t = Table.from(rows);
-      expect(t.toString(), 'code value\n BOS     2\n BOS     4');
-    });
-
-    test('print table, different column types', () {
-      var rows = <Map>[
-        {'tree': 'Oak',   'age': 2.5, 'diameter': 10.001},
-        {'tree': 'Maple', 'age': 4.1, 'diameter': 13.452},
-      ];
-      var t = Table.from(rows);
-      expect(t.toString(),
-          ' tree age diameter\n  Oak 2.5   10.001\nMaple 4.1   13.452');
-    });
-
-    test('print table, custom format', () {
-      var rows = <Map>[
-        {'int': 1, 'value': sqrt(1)},
-        {'int': 2, 'value': sqrt2},
-      ];
-      var options = {
-        'columnSeparation': '  ',
-        'format': {'value': (e) => (e as double).toStringAsPrecision(6)},
-      };
-      var t = Table.from(rows, options: options);
-      print(t);
-      expect(t.toString(),
-          'int    value\n  1  1.00000\n  2  1.41421');
-    });
-
-
-    test('table toCsv()', () {
-      var rows = <Map>[
-        {'code': 'BOS', 'value': 2},
-        {'code': 'ATL', 'value': 4}
-      ];
-      var t = Table.from(rows);
-      expect(t.toCsv(), 'code,value\r\nBOS,2\r\nATL,4');
     });
 
 
@@ -465,7 +489,8 @@ void table_simple() {
         {'code': 'BOS', 'variable': 'Tmax', 'id': 'B', 'value': 94},
         {'code': 'BWI', 'variable': 'Tmin', 'id': 'B', 'value': 30},
       ]);
-      var tc = t.reshape(['code'], ['id', 'variable'], (x) => x.length, fill: 0);
+      var tc =
+          t.reshape(['code'], ['id', 'variable'], (x) => x.length, fill: 0);
       //print(tc);
       expect(tc.nrow, 2);
       expect(tc['A_Tmin'].data, [2, 0]);
