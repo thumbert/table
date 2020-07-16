@@ -54,7 +54,7 @@ class Nest {
   ///    'foo2': {'bar1': [...], 'bar2': [...], ...},
   ///    ...
   ///  }
-  dynamic map(List<Map> values) {
+  dynamic map(List values) {
     return _map(values, 0);
   }
 
@@ -64,10 +64,10 @@ class Nest {
     }
 
     var res = {};
-    x.forEach((v) {
+    for (var v in x) {
       var k = _keys[depth](v);
       res.putIfAbsent(k, () => []).add(v);
-    });
+    }
 
     return Map.fromIterables(
         res.keys, res.keys.map((k) => _map(res[k], depth + 1)));

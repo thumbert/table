@@ -94,6 +94,7 @@ class Table extends Object with IterableMixin<Map> {
     'columnSeparation': ' ',
     'format': <String, String Function(dynamic)>{},
     'columnWidth': <String,int>{},
+    'fillValue': null,
   };
 
   Map<String, dynamic> _options;
