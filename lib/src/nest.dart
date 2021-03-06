@@ -1,8 +1,8 @@
 library nest;
 
 class Nest {
-  List<Function> _keys;
-  Function _rollup;
+  late List<Function> _keys;
+  Function? _rollup;
 
   /// Define a nesting object.  Use keys and rollup functions to aggregate data.
   /// See https://github.com/d3/d3-collection#nests for the original idea.
@@ -58,13 +58,13 @@ class Nest {
     return _map(values, 0);
   }
 
-  dynamic _map(List x, int depth) {
+  dynamic _map(List? x, int depth) {
     if (depth >= _keys.length) {
-      return _rollup != null ? _rollup(x) : x;
+      return _rollup != null ? _rollup!(x) : x;
     }
 
     var res = {};
-    for (var v in x) {
+    for (var v in x!) {
       var k = _keys[depth](v);
       res.putIfAbsent(k, () => []).add(v);
     }
@@ -75,13 +75,13 @@ class Nest {
 
   // the return needs to be dynamic, because it's either a List or
   // the result of the rollup function which can be a single value.
-  dynamic _entries(List x, int depth) {
+  dynamic _entries(List? x, int depth) {
     if (depth >= _keys.length) {
-      return _rollup != null ? _rollup(x) : x;
+      return _rollup != null ? _rollup!(x) : x;
     }
 
     var res = <Map>[];
-    x.forEach((v) {
+    x!.forEach((v) {
       var k = _keys[depth](v);
       var exists = false;
       var i = 0;

@@ -44,12 +44,11 @@ void tests() {
         {'code': 'BWI', 'month': 1, 'Tmax': null, 'Tmin': 3},
         {'code': 'BWI', 'month': 2, 'Tmax': 67, 'Tmin': 1},
       ];
-      var out = aggregate(xs, ['code'], ['Tmax'],
-          (zs) => mean(zs.where((e) => e != null)));
+      var out = aggregate(xs.where((e) => e['Tmax'] != null).toList(), ['code'],
+          ['Tmax'], mean);
       expect(out, [
         {'code': 'BWI', 'Tmax': 66.0},
       ]);
-
     });
   });
 }

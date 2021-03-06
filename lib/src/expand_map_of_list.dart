@@ -17,10 +17,10 @@ import 'collapse_list_of_map.dart';
 /// ];
 /// ```
 List<Map<String,dynamic>> expandMapOfList(Map<String,List> x,
-    {List<String> columns}) {
+    {List<String>? columns}) {
   columns ??= x.keys.toList();
   var out = <Map<String,dynamic>>[];
-  var n = x[columns.first].length;
+  var n = x[columns.first]!.length;
   var equalLengths = x.values.map((e) => e.length).every((e) => e == n);
   if (!equalLengths) {
     throw ArgumentError('Not all keys have the same number of elements.');
@@ -29,7 +29,7 @@ List<Map<String,dynamic>> expandMapOfList(Map<String,List> x,
   for (var i=0; i<n; i++) {
     var values = [];
     for (var column in columns) {
-      values.add(x[column][i]);
+      values.add(x[column]![i]);
     }
     out.add(Map.fromIterables(columns, values));
   }

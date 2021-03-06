@@ -42,7 +42,7 @@ void tests() {
 
     test('nest two levels, get entries', () {
       var nest = Nest()..key((e) => e['foo'])..key((e) => e['bar']);
-      List res = nest.entries([a, b, c, d, e, f]);
+      List? res = nest.entries([a, b, c, d, e, f]);
       //res.forEach(print);
       expect(res, [
         {
@@ -155,7 +155,7 @@ void tests() {
       var nest = Nest()
         ..key((d) => d['year'])
         ..key((d) => d['variety'])
-        ..rollup((List xs) => sum(xs.map((e) => e['yield'])));
+        ..rollup((List xs) => sum(xs.map(((e) => e['yield'] as num))));
       var res = nest.map(barley) as Map;
       expect(res.keys.toSet(), {'1931', '1932'});
       expect(res['1931']['Peatland'], 219.5);

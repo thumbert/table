@@ -190,7 +190,7 @@ void table_simple() {
       var t = Table()
         ..addColumn(['BWI', 'BOS', 'BWI', 'BOS'], name: 'code')
         ..addColumn([1, 2, 3, 4], name: 'value');
-      expect(t.where((e) => e['code'] == 'BOS').toList(), [
+      expect(t.where((e) => e!['code'] == 'BOS').toList(), [
         {'code': 'BOS', 'value': 2},
         {'code': 'BOS', 'value': 4}
       ]);
@@ -274,7 +274,7 @@ void table_simple() {
       t.removeRow(1);
       expect(t.nrow, 3);
       expect(t.removeRow(5), false);
-      var t2 = Table.from(t.where((Map e) => e['Tmin'] > 30));
+      var t2 = Table.from(t.where((Map? e) => e!['Tmin'] > 30));
       expect(t2.nrow, 2);
     });
 
@@ -451,7 +451,7 @@ void table_simple() {
         {'farm': 'B', 'checked': true, 'meatType': 'beef', 'quantity': 35}
       ]);
       Function sum = (Iterable x) => x.reduce((a, b) => a + b);
-      var gT = t.groupApply(sum,
+      var gT = t.groupApply(sum as dynamic Function(Iterable<dynamic>),
           groupBy: ['farm', 'checked'], variables: ['quantity']);
       expect(gT['farm'].data, ['A', 'A', 'B', 'B']);
       expect(gT['checked'].data, [true, false, true, false]);
@@ -518,7 +518,7 @@ void speed_test() {
   print(t.head());
 
   Function mean = (Iterable x) => x.reduce((a, b) => a + b) / x.length;
-  var agg = t.groupApply(mean, groupBy: ['id'], variables: ['value']);
+  var agg = t.groupApply(mean as dynamic Function(Iterable<dynamic>), groupBy: ['id'], variables: ['value']);
   print(agg.head());
   print(agg.sample());
 }

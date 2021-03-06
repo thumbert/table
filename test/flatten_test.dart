@@ -26,7 +26,7 @@ void test2() {
 
   //res.forEach(print);
   test('flattenMap, two nesting levels', () {
-    List res = flattenMap(data, ['level0', 'level1', 'value']);
+    List? res = flattenMap(data, ['level0', 'level1', 'value']);
     expect(res, [
       {'level0': 'B1', 'level1': 'Jan15', 'value': 1},
       {'level0': 'B1', 'level1': 'Feb15', 'value': 2},
@@ -37,7 +37,7 @@ void test2() {
     ]);
   });
   test('flattenMap, two nesting levels, show only one', () {
-    List res = flattenMap(data, ['tag']);
+    List? res = flattenMap(data, ['tag']);
     expect(res, [
       {'tag': 'B1', 'Jan15': 1, 'Feb15': 2},
       {'tag': 'B2', 'Jan15': 3, 'Feb15': 4},

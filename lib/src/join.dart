@@ -29,13 +29,13 @@ List<Map<String, dynamic>> join(
   var g1k = LinkedHashSet(
       equals: _rowEquality.equals,
       isValidKey: _rowEquality.isValidKey,
-      hashCode: (e) => _rowEquality.hash(e));
-  g1k.addAll(g1.keys);
+      hashCode: (dynamic e) => _rowEquality.hash(e));
+  g1k.addAll(g1.keys as Iterable<Map<dynamic, dynamic>?>);
   var g2k = LinkedHashSet(
       equals: _rowEquality.equals,
       isValidKey: _rowEquality.isValidKey,
-      hashCode: (e) => _rowEquality.hash(e));
-  g2k.addAll(g2.keys);
+      hashCode: (dynamic e) => _rowEquality.hash(e));
+  g2k.addAll(g2.keys as Iterable<Map<dynamic, dynamic>?>);
 
 
   var res = <Map<String,dynamic>>[];
@@ -108,7 +108,7 @@ LinkedHashMap _groupBy(Iterable<Map<String,dynamic>> x, Function f) {
   var result = LinkedHashMap(
       equals: _rowEquality.equals,
       isValidKey: _rowEquality.isValidKey,
-      hashCode: (e) => _rowEquality.hash(e));
+      hashCode: (dynamic e) => _rowEquality.hash(e));
   x.forEach((v) => result.putIfAbsent(f(v), () => []).add(v));
 
   return result;

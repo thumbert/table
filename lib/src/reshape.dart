@@ -62,7 +62,7 @@ List<Map> reshape(List<Map<String, dynamic>> xs, List<String> rows,
 Map<dynamic, List<int>> _groupByIndex(Iterable x, Function f) {
   const _rowEquality = MapEquality();
   Map<dynamic, List<int>> result = LinkedHashMap(
-      equals: _rowEquality.equals,
+      equals: _rowEquality.equals as bool Function(dynamic, dynamic)?,
       isValidKey: _rowEquality.isValidKey,
       hashCode: (e) => _rowEquality.hash(e));
 

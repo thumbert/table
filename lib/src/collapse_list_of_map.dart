@@ -16,7 +16,7 @@ library collapse_list_of_map;
 /// Return ```{'code': ['BWI', 'BOS', 'BWI'], 'value': [15, 17, 25]}```
 ///
 Map<String, List> collapseListOfMap(List<Map<String,dynamic>> xs,
-    {List<String> columns}) {
+    {List<String>? columns}) {
   if (xs.isEmpty) return <String,List>{};
   columns ??= xs.first.keys.toList();
   var out = Map.fromIterables(columns,
@@ -26,7 +26,7 @@ Map<String, List> collapseListOfMap(List<Map<String,dynamic>> xs,
       if (!x.containsKey(column)) {
         throw ArgumentError('Row $x does not contain column $column');
       }
-      out[column].add(x[column]);
+      out[column]!.add(x[column]);
     }
   }
   return out;
@@ -34,6 +34,6 @@ Map<String, List> collapseListOfMap(List<Map<String,dynamic>> xs,
 
 @Deprecated('Replaced by collapseListOfMap')
 Map<String, List> rowsToColumns(List<Map<String,dynamic>> xs,
-    {List<String> columns}) {
+    {List<String>? columns}) {
   return collapseListOfMap(xs, columns: columns);
 }

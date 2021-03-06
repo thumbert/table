@@ -11,9 +11,9 @@ import 'package:dama/dama.dart' show sum;
 ///
 /// Don't like the name.
 List<Map<String, dynamic>> columnSum(List<Map<String, dynamic>> xs,
-    {List<String> columnsToIgnore,
-    List<String> columnsToSum,
-    bool Function(num) accept}) {
+    {List<String>? columnsToIgnore,
+    List<String>? columnsToSum,
+    bool Function(num)? accept}) {
   var out = <Map<String, dynamic>>[];
   if (xs.isEmpty) return out;
   accept ??= (num e) => true;
@@ -25,7 +25,7 @@ List<Map<String, dynamic>> columnSum(List<Map<String, dynamic>> xs,
     for (var column in keys) {
       if (x[column] is List) {
         one[column] =
-            sum((x[column] as List).cast<num>().where((e) => accept(e)));
+            sum((x[column] as List).cast<num>().where((e) => accept!(e)));
       } else {
         one[column] = x[column];
       }

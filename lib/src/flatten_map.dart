@@ -34,32 +34,32 @@ List extractValues(Map x) {
 ///
 /// To unwrap only part of the nested map, specify fewer
 /// [levelNames]. 
-List<Map<String,dynamic>> flattenMap(Map m, List<String> levelNames) {
-  if (levelNames.isEmpty) return [m];
+List<Map<String,dynamic>>? flattenMap(Map m, List<String> levelNames) {
+  if (levelNames.isEmpty) return [m as Map<String, dynamic>];
   return _flatten(m, 0, levelNames);
 }
 
-List<Map<String,dynamic>> _flatten(Map m, int level, List<String> levelNames) {
-  List<Map<String,dynamic>> out;
+List<Map<String,dynamic>>? _flatten(Map m, int level, List<String> levelNames) {
+  List<Map<String,dynamic>>? out;
   var name = levelNames[level];
 
   m.forEach((k, v) {
     if (level < levelNames.length-1 && v is Map) {
       out ??= <Map<String,dynamic>>[];
-      var aux = _flatten(v, level + 1, levelNames);
-      out.addAll(aux.map((Map e) => {name: k}..addAll(e)));
+      var aux = _flatten(v, level + 1, levelNames)!;
+      out!.addAll(aux.map((Map e) => {name: k}..addAll(e as Map<String, dynamic>)));
     } else {
       /// last level
       out ??= <Map<String,dynamic>>[];
       if (v is Map) {
         if (level == levelNames.length-1) {
-          out.add({name: k}..addAll(v));
+          out!.add({name: k}..addAll(v as Map<String, dynamic>));
         } else {
           v[name] = k;
-          out.add(v);
+          out!.add(v as Map<String, dynamic>);
         }
       } else {
-        out.add({name: k, levelNames[level+1]: v});
+        out!.add({name: k, levelNames[level+1]: v});
       }
     }
   });

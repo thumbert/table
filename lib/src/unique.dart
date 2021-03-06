@@ -8,7 +8,7 @@ const _rowEquality = MapEquality();
 /// Get the unique Map elements from a list.  If [keys] are specified, 
 /// only the Map elements with the keys specified are returned. 
 ///
-List<Map> unique(List<Map> xs, {List keys}) {
+List<Map> unique(List<Map> xs, {List? keys}) {
   Set<Map> uRows = LinkedHashSet(
       equals: _rowEquality.equals,
       isValidKey: _rowEquality.isValidKey,
