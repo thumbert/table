@@ -11,9 +11,9 @@ import 'package:collection/collection.dart';
 /// [rows] is the list of variables that will remain as rows.
 /// [columns] is the list of variables that will become columns.  Usually
 /// [columns] is a single element list.
-///
-List<Map> reshape(List<Map<String, dynamic>> xs, List<String> rows,
-    List<String> columns, String variable, {fill: null}) {
+/// [fill] is the value you want to fill, defaults to null.
+List<Map<String,dynamic>> reshape(List<Map<String, dynamic>> xs, List<String> rows,
+    List<String> columns, String variable, {dynamic fill}) {
   // group rows
   var _fg =
       (Map row) => Map.fromIterables(rows, rows.map((g) => row[g]));

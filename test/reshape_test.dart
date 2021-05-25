@@ -40,7 +40,8 @@ void tests() {
         {'entity': 'B', 'version': 1, 'value': 1.5},
       ];
       var out = table.reshape(xs, ['entity'], ['version'], 'value');
-      var mis = table.addMissing(out as List<Map<String, dynamic>>);
+      // out has already the missing cells filled, what are you doing below?
+      var mis = table.addMissing(out);
       mis.sort((a,b) => a['entity'].compareTo(b['entity']));
       expect(mis, [
         {'entity': 'A', '0': 0.0, '1': 1.0},
