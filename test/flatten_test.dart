@@ -94,7 +94,6 @@ void test3() {
   });
 }
 
-
 void test2Names() {
   test('flattenMap, extra levelName get ignored', () {
     var data = {
