@@ -1,6 +1,7 @@
 library test.nest;
 
 import 'package:dama/dama.dart';
+import 'package:table/src/flatten_map.dart';
 import 'package:table/src/nest.dart';
 import 'package:test/test.dart';
 import 'data.dart';
@@ -41,7 +42,9 @@ void tests() {
     });
 
     test('nest two levels, get entries', () {
-      var nest = Nest()..key((e) => e['foo'])..key((e) => e['bar']);
+      var nest = Nest()
+        ..key((e) => e['foo'])
+        ..key((e) => e['bar']);
       List? res = nest.entries([a, b, c, d, e, f]);
       //res.forEach(print);
       expect(res, [
@@ -125,7 +128,9 @@ void tests() {
       });
     });
     test('nest map with two keys', () {
-      var nest = Nest()..key((Map e) => e['foo'])..key((Map e) => e['bar']);
+      var nest = Nest()
+        ..key((Map e) => e['foo'])
+        ..key((Map e) => e['bar']);
       expect(nest.map([a, b, c, d, e, f]), {
         1: {
           'a': [a, b],
@@ -142,7 +147,9 @@ void tests() {
   group('Nest test (barley data):', () {
     var barley = loadDataBarley();
     test('barley data nest by year/variety', () {
-      var nest = Nest()..key((d) => d['year'])..key((d) => d['variety']);
+      var nest = Nest()
+        ..key((d) => d['year'])
+        ..key((d) => d['variety']);
       var res = nest.entries(barley) as List;
       expect(res.length, 2);
       expect(res.map((e) => e['key']).toList(), ['1931', '1932']);
@@ -160,6 +167,27 @@ void tests() {
       expect(res.keys.toSet(), {'1931', '1932'});
       expect(res['1931']['Peatland'], 219.5);
     });
+
+    // test('Aggregate 1 levels, two variables', () {
+    //   var data = [
+    //     {'location': 'A', 'month': 1, 'tMin': 30, 'tMax': 40},
+    //     {'location': 'A', 'month': 2, 'tMin': 32, 'tMax': 42},
+    //     {'location': 'B', 'month': 1, 'tMin': 50, 'tMax': 60},
+    //     {'location': 'B', 'month': 2, 'tMin': 54, 'tMax': 66},
+    //   ];
+    //   var nest = Nest()
+    //     ..key((e) => e['location'])
+    //     ..rollup((List xs) {
+    //       return {
+    //         'tMin': sum(xs.map((e) => e['tMin'])),
+    //         'tMax': sum(xs.map((e) => e['tMax'])),
+    //       };
+    //     });
+    //   var res = nest.map(data) as Map;
+    //   print(res);
+    //   var out = flattenMap(res, ['location']);
+    //   print(out);
+    // });
   });
 }
 

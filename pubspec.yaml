@@ -1,8 +1,8 @@
 name: table
 description: A table like data structure for Dart
 version: 2.0.0
-author: Tony Humbert <tony.humberts@gmail.com>
 homepage: https://github.com/thumbert/table.git
+publish_to: none
 
 environment:
   sdk: '>=2.12.0 <3.0.0'
@@ -10,8 +10,7 @@ environment:
 dependencies:
   csv: ^5.0.0
   dama:
-    git:
-      url: git://github.com/thumbert/dama.git
+    git: https://github.com/thumbert/dama.git
   more: ^3.0.1
 
 dev_dependencies:
