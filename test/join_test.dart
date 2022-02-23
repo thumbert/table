@@ -4,13 +4,13 @@ import 'package:table/table_base.dart' as table_base;
 
 void tests() {
   group('Join two tables', () {
-    test('joins by one column', () {
-      var t1 = <Map<String,dynamic>>[
+    test('joins by one column, no aggregation function', () {
+      var t1 = <Map<String, dynamic>>[
         {'code': 'BOS', 'Tmin': 30},
         {'code': 'BWI', 'Tmin': 32},
         {'code': 'LAX', 'Tmin': 49}
       ];
-      var t2 = <Map<String,dynamic>>[
+      var t2 = <Map<String, dynamic>>[
         {'code': 'BOS', 'Tmax': 95},
         {'code': 'ORH', 'Tmax': 92},
         {'code': 'LAX', 'Tmax': 82}
@@ -35,13 +35,26 @@ void tests() {
       expect(to.map((e) => e['Tmin']).toList(), [30, 49, 32, null]);
       expect(to.map((e) => e['Tmax']).toList(), [95, 82, null, 92]);
     });
-
+    test('joins by one column, with aggregation function', () {
+      var t1 = <Map<String, dynamic>>[
+        {'code': 'BOS', 'Tmin': 30},
+        {'code': 'BWI', 'Tmin': 32},
+        {'code': 'LAX', 'Tmin': 49}
+      ];
+      var t2 = <Map<String, dynamic>>[
+        {'code': 'BOS', 'Tmax': 95},
+        {'code': 'ORH', 'Tmax': 92},
+        {'code': 'LAX', 'Tmax': 82}
+      ];
+      var ti = table.join(t1, t2,
+          f: (x, y) => [MapEntry('Tmax - Tmin', y['Tmax'] - x['Tmin'])]);
+      expect(ti.length, 2);
+      expect(ti.map((e) => e['code']).toList(), ['BOS', 'LAX']);
+      expect(ti.map((e) => e['Tmax - Tmin']).toList(), [65, 33]);
+    });
   });
 }
-
 
 void main() {
   tests();
 }
-
-
