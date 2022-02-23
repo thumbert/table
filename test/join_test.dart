@@ -52,6 +52,24 @@ void tests() {
       expect(ti.map((e) => e['code']).toList(), ['BOS', 'LAX']);
       expect(ti.map((e) => e['Tmax - Tmin']).toList(), [65, 33]);
     });
+    test('join with specified column names', () {
+      var t1 = <Map<String, dynamic>>[
+        {'code': 'BOS', 'value': 30},
+        {'code': 'BWI', 'value': 32},
+        {'code': 'LAX', 'value': 49}
+      ];
+      var t2 = <Map<String, dynamic>>[
+        {'code': 'BOS', 'value': 95},
+        {'code': 'ORH', 'value': 92},
+        {'code': 'LAX', 'value': 82}
+      ];
+      var ti = table.join(t1, t2,
+          byColumns: ['code'],
+          f: (x, y) => [MapEntry('value', y['value'] - x['value'])]);
+      expect(ti.length, 2);
+      expect(ti.map((e) => e['code']).toList(), ['BOS', 'LAX']);
+      expect(ti.map((e) => e['value']).toList(), [65, 33]);
+    });
   });
 }
 
