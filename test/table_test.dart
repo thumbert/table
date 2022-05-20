@@ -160,10 +160,11 @@ void table_simple() {
         'columnWidth': {'state': 15},
       };
       var t = Table.from(rows, options: options);
-      expect(t.toString(),
-              '          state    value\n'
-              '           Ohio  1.00000\n'
-              '       Maryland  1.41421');
+      expect(
+          t.toString(),
+          '          state    value\n'
+          '           Ohio  1.00000\n'
+          '       Maryland  1.41421');
     });
 
     test('table toCsv()', () {
@@ -174,7 +175,6 @@ void table_simple() {
       var t = Table.from(rows);
       expect(t.toCsv(), 'code,value\r\nBOS,2\r\nATL,4');
     });
-
 
     test('row iterator', () {
       var t = Table()
@@ -210,7 +210,6 @@ void table_simple() {
       equals(t2.nrow, 2);
     });
 
-
     test('adding a column with existing name throws', () {
       var rows = <Map>[
         {'code': 'BOS', 'value': 2},
@@ -238,7 +237,9 @@ void table_simple() {
         {'code': 'BWI', 'Tmin': 32, 'Tmax': 100}
       ];
       var t = Table.from(rows);
-      t..removeColumn('Tmin')..removeColumn('Tmax');
+      t
+        ..removeColumn('Tmin')
+        ..removeColumn('Tmax');
       expect(t.ncol, 1);
     });
 
@@ -509,6 +510,35 @@ void table_simple() {
   });
 }
 
+void table_html() {
+  group('Table toHtml() method', () {
+    test('simple 1', () {
+      var tbl = Table.from([
+        {
+          'region': 'CAISO',
+          'value': 83499,
+        },
+        {
+          'region': 'PJM',
+          'value': 423412,
+        },
+        {
+          'region': 'ISONE',
+          'value': 84271.34,
+        },
+      ]);
+      var out = tbl.toHtml();
+      expect(out, '''<table>
+<tr><th>region</th><th>value</th></tr>
+<tr><td>CAISO</td><td>83499</td></tr>
+<tr><td>PJM</td><td>423412</td></tr>
+<tr><td>ISONE</td><td>84271.34</td></tr>
+</table>
+''');
+    });
+  });
+}
+
 void speed_test() {
   var t = Table.fromCartesianProduct([
     Column(List.generate(10000, (i) => i), 'id'),
@@ -518,14 +548,16 @@ void speed_test() {
   print(t.head());
 
   Function mean = (Iterable x) => x.reduce((a, b) => a + b) / x.length;
-  var agg = t.groupApply(mean as dynamic Function(Iterable<dynamic>), groupBy: ['id'], variables: ['value']);
+  var agg = t.groupApply(mean as dynamic Function(Iterable<dynamic>),
+      groupBy: ['id'], variables: ['value']);
   print(agg.head());
   print(agg.sample());
 }
 
 void main() {
-  table_simple();
-  column_test();
+  // table_simple();
+  // column_test();
+  table_html();
   //speed_test();
 
 //  Ordering ord = Ordering.natural().nullsFirst();

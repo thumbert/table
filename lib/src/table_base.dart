@@ -845,6 +845,35 @@ class Table extends Object with IterableMixin<Map?> {
     return res.join('\n');
   }
 
+  /// Create an Html table
+  /// For example [style] can be
+  /// ```
+  /// <style>
+  /// table, th {
+  ///   border-spacing: 2px;
+  ///   border:1px solid red;
+  /// }
+  /// </style>
+  /// ```
+  String toHtml() {
+    var out = StringBuffer();
+    out.writeln('<table>');
+    out.writeAll([
+      '<tr>',
+      ...[for (var e in colnames) '<th>$e</th>'],
+      '</tr>\n',
+    ]);
+    for (var r = 0; r < nrow; r++) {
+      out.write('<tr>');
+      for (var c = 0; c < ncol; c++) {
+        out.write('<td>${column(c)[r]}</td>');
+      }
+      out.write('</tr>\n');
+    }
+    out.writeln('</table>');
+    return out.toString();
+  }
+
   /// Return the first [n] rows of this table as another table.
   Table head({int n = 6}) => Table.from(take(n));
 

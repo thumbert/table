@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.1 (Released on 2022-05-18)
+- Basic support for exporting a table to html
+
 ## 2.0.0 (Released on 2021-03-06)
 - Migrated to null safety, no new functionality
 

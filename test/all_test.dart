@@ -24,6 +24,8 @@ void main() {
   rename.tests();
   reorder.tests();
   reshape.tests();
-  table.main();
+  table.table_simple();
+  table.column_test();
+  table.table_html();
   unique.tests();
 }
