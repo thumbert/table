@@ -1,5 +1,8 @@
 # Changelog
 
+## Release 2022-11-18
+- Add a function to calculate the union of two `List<Map<String,dynamic>>`.   
+
 ## 2.0.1 (Released on 2022-05-18)
 - Basic support for exporting a table to html
 

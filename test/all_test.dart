@@ -12,6 +12,7 @@ import 'reorder_columns_test.dart' as reorder;
 import 'reshape_test.dart' as reshape;
 import 'table_test.dart' as table;
 import 'unique_test.dart' as unique;
+import 'union_test.dart' as union;
 
 void main() {
   aggregate.tests();
@@ -28,4 +29,5 @@ void main() {
   table.column_test();
   table.table_html();
   unique.tests();
+  union.tests();
 }

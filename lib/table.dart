@@ -17,3 +17,4 @@ export 'src/reorder_columns.dart';
 export 'src/reshape.dart';
 export 'src/collapse_list_of_map.dart';
 export 'src/unique.dart';
+export 'src/union.dart';

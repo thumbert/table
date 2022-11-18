@@ -58,6 +58,12 @@ var diff = table.join(t1, t2, f: (x, y) => [MapEntry('diff', y['Tmax'] - x['Tmin
 The argument `f` is only taken into account for an inner join. 
 
 
+#### Other utilities 
+
+Calculate the unique list of `Map<String,dynamic>` elements by using `unique`.
+
+Calculate the union of two lists of `Map<String,dynamic>` elements by using `union`.
+
 ## Features and bugs
 
 Please file feature requests and bugs at the [issue tracker][tracker].

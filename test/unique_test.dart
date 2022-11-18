@@ -3,12 +3,12 @@ library test.unique_test;
 import 'package:test/test.dart';
 import 'package:table/table.dart';
 
-tests() {
-  group('unique maps:', (){
-    List<Map> xs = [
-      {'type': 'A', 'time': new DateTime(2018), 'value': 10},
-      {'type': 'A', 'time': new DateTime(2018), 'value': 10},
-      {'type': 'B', 'time': new DateTime(2018), 'value': 10},
+void tests() {
+  group('Unique list of maps:', (){
+    var xs = <Map>[
+      {'type': 'A', 'time': DateTime(2018), 'value': 10},
+      {'type': 'A', 'time': DateTime(2018), 'value': 10},
+      {'type': 'B', 'time': DateTime(2018), 'value': 10},
     ];
     test('no names', (){
       var res = unique(xs);
@@ -20,18 +20,18 @@ tests() {
       expect(res, [{'type': 'A'}, {'type': 'B'},]);
     });
     test('with two names', (){
-      xs.add({'type': 'A', 'time': new DateTime(2019), 'value': 10});
+      xs.add({'type': 'A', 'time': DateTime(2019), 'value': 10});
       var res = unique(xs, keys: ['type', 'time']);
       var out = [
-        {'type': 'A', 'time': new DateTime(2018)},
-        {'type': 'B', 'time': new DateTime(2018)},
-        {'type': 'A', 'time': new DateTime(2019)},];
+        {'type': 'A', 'time': DateTime(2018)},
+        {'type': 'B', 'time': DateTime(2018)},
+        {'type': 'A', 'time': DateTime(2019)},];
       expect(res.length, 3);
       expect(res, out);
     });
   });
 }
 
-main() {
+void main() {
   tests();
 }
