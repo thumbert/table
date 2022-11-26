@@ -1,8 +1,9 @@
 library all_test;
 
 import 'aggregate_test.dart' as aggregate;
-import 'expand_map_of_list_test.dart' as c2r;
+import 'column_test.dart' as column;
 import 'collapse_list_of_map_test.dart' as r2c;
+import 'expand_map_of_list_test.dart' as c2r;
 import 'flatten_test.dart' as flatten;
 import 'join_test.dart' as join;
 import 'melt_test.dart' as melt;
@@ -17,6 +18,7 @@ import 'union_test.dart' as union;
 void main() {
   aggregate.tests();
   c2r.tests();
+  column.tests();
   r2c.tests();
   flatten.main();
   join.tests();
@@ -26,7 +28,6 @@ void main() {
   reorder.tests();
   reshape.tests();
   table.table_simple();
-  table.column_test();
   table.table_html();
   unique.tests();
   union.tests();

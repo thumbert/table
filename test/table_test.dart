@@ -5,36 +5,9 @@ library table.test;
 
 import 'dart:math';
 
+import 'package:table/src/column.dart';
 import 'package:test/test.dart';
 import 'package:table/table_base.dart';
-
-void column_test() {
-  test('print column, string', () {
-    var c = Column(['BWI', 'BOS', 'DC'], 'airport');
-    expect(c.toString(), 'airport\n    BWI\n    BOS\n     DC');
-  });
-  test('print column, integer', () {
-    var c = Column([1, 2, 100], 'index');
-    expect(c.toString(), 'index\n    1\n    2\n  100');
-  });
-  test('print column, double', () {
-    var c = Column([sqrt(2), pi, 100.0], 'value');
-    expect(c.toString(), '     value\n  1.414214\n  3.141593\n100.000000');
-  });
-  test('print column, double with few decimals', () {
-    var c = Column([14.5, 2.4, 100.0], 'value');
-    expect(c.toString(), 'value\n 14.5\n  2.4\n100.0');
-  });
-  test('column with specified width', () {
-    var c = Column(['Ohio', 'Maryland', 'Arizona'], 'state', width: 15);
-    expect(
-        c.toString(),
-        '          state\n'
-        '           Ohio\n'
-        '       Maryland\n'
-        '        Arizona');
-  });
-}
 
 void table_simple() {
   group('table: ', () {
@@ -150,7 +123,7 @@ void table_simple() {
     });
 
     test('print table, custom format and columnWidth', () {
-      var rows = <Map>[
+      var rows = [
         {'state': 'Ohio', 'value': sqrt(1)},
         {'state': 'Maryland', 'value': sqrt2},
       ];
@@ -160,6 +133,7 @@ void table_simple() {
         'columnWidth': {'state': 15},
       };
       var t = Table.from(rows, options: options);
+      // print(t.toString());
       expect(
           t.toString(),
           '          state    value\n'
@@ -174,6 +148,30 @@ void table_simple() {
       ];
       var t = Table.from(rows);
       expect(t.toCsv(), 'code,value\r\nBOS,2\r\nATL,4');
+    });
+
+    test('table toCsv() with nulls', () {
+      var rows = [
+        {'code': 'BOS', 'value': 23.0},  // NOTE: first value makes the column double!
+        {'code': 'BWI', 'value': null},
+        {'code': 'ORD', 'value': 0/0},
+        {'code': 'ATL', 'value': 144}
+      ];
+      var t = Table.from(rows, options: {
+        'nullToString': '',
+      });
+      expect(t.toCsv(), 'code,value\r\nBOS,23.0\r\nBWI,\r\nORD,NaN\r\nATL,144');
+    });
+
+    test('table toCsv() with nulls, using default value', () {
+      var rows = [
+        {'code': 'BOS', 'value': 23.0},  // NOTE: first value makes the column double!
+        {'code': 'BWI', 'value': null},
+        {'code': 'ORD', 'value': 0/0},
+        {'code': 'ATL', 'value': 144}
+      ];
+      var t = Table.from(rows);
+      expect(t.toCsv(), 'code,value\r\nBOS,23.0\r\nBWI,\r\nORD,NaN\r\nATL,144');
     });
 
     test('row iterator', () {
@@ -504,7 +502,7 @@ void table_simple() {
       var t = Table()
         ..addColumn(days, name: 'day')
         ..addColumn([0, 1, 0, 1, 2, 1, 3, 1, 2, 5], name: 'value');
-      t..addColumn(t.rollApply('value', 3, sum), name: 'sum3');
+      t.addColumn(t.rollApply('value', 3, sum), name: 'sum3');
       expect(t['sum3'].data, [null, null, 1, 2, 3, 4, 6, 5, 6, 8]);
     });
   });
@@ -555,9 +553,8 @@ void speed_test() {
 }
 
 void main() {
-  // table_simple();
-  // column_test();
-  table_html();
+  table_simple();
+  // table_html();
   //speed_test();
 
 //  Ordering ord = Ordering.natural().nullsFirst();

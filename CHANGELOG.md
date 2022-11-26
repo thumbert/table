@@ -1,5 +1,16 @@
 # Changelog
 
+## TODO:
+- Make a setter `options` for `Table`.
+- Don't print `null`s.  Make an option to ignore them by default. 
+
+## 2.1.0, Release 2022-11-26
+- Refactor `Column` to its own file
+- Added a new option `nullToString` to deal with null values when printing 
+- Better treatment for table `toString()` method.  Now using `options` to format  
+individual columns
+- Same for `toCsv()` method.  
+
 ## Release 2022-11-18
 - Add a function to calculate the union of two `List<Map<String,dynamic>>`.   
 
