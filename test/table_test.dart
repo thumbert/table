@@ -70,7 +70,7 @@ void table_simple() {
         {'code': 'BOS', 'value': 2},
         {'Tmin': 24, 'code': 'BOS'}
       ];
-      var t = Table.from(rows, colnamesFromFirstRow: false);
+      var t = Table.from(rows);
       expect(t.nrow, 2);
       expect(t.ncol, 3);
       expect(t.colnames, ['code', 'value', 'Tmin']);
@@ -141,6 +141,23 @@ void table_simple() {
           '       Maryland  1.41421');
     });
 
+    test('print table with missing observations (issue 3)', () {
+      var tbl = Table.from(
+          [
+            {'year': 2021, '10': 42, '11': 37, '12': 35},
+            {'year': 2022, '1': 28, '2': 31, '3': 36},
+          ],
+          options: {
+            'nullToString': '',
+          });
+      tbl.reorderColumns(['year', '1', '2', '3', '10', '11', '12']);
+      expect(
+          tbl.toString(),
+          'year  1  2  3 10 11 12\n'
+          '2021          42 37 35\n'
+          '2022 28 31 36         ');
+    });
+
     test('table toCsv()', () {
       var rows = <Map>[
         {'code': 'BOS', 'value': 2},
@@ -152,9 +169,12 @@ void table_simple() {
 
     test('table toCsv() with nulls', () {
       var rows = [
-        {'code': 'BOS', 'value': 23.0},  // NOTE: first value makes the column double!
+        {
+          'code': 'BOS',
+          'value': 23.0
+        }, // NOTE: first value makes the column double!
         {'code': 'BWI', 'value': null},
-        {'code': 'ORD', 'value': 0/0},
+        {'code': 'ORD', 'value': 0 / 0},
         {'code': 'ATL', 'value': 144}
       ];
       var t = Table.from(rows, options: {
@@ -165,9 +185,12 @@ void table_simple() {
 
     test('table toCsv() with nulls, using default value', () {
       var rows = [
-        {'code': 'BOS', 'value': 23.0},  // NOTE: first value makes the column double!
+        {
+          'code': 'BOS',
+          'value': 23.0
+        }, // NOTE: first value makes the column double!
         {'code': 'BWI', 'value': null},
-        {'code': 'ORD', 'value': 0/0},
+        {'code': 'ORD', 'value': 0 / 0},
         {'code': 'ATL', 'value': 144}
       ];
       var t = Table.from(rows);
@@ -239,6 +262,18 @@ void table_simple() {
         ..removeColumn('Tmin')
         ..removeColumn('Tmax');
       expect(t.ncol, 1);
+    });
+
+    test('reorder columns', () {
+      var rows = [
+        {'year': 2020, 'BOS': 30, 'ATL': 95},
+        {'year': 2021, 'BOS': 32, 'ATL': 100}
+      ];
+      var t = Table.from(rows);
+      t.reorderColumns(['year', 'ATL', 'BOS']);
+      expect(t.ncol, 3);
+      expect(t.colnames, ['year', 'ATL', 'BOS']);
+      expect(t.toString(), 'year ATL BOS\n2020  95  30\n2021 100  32');
     });
 
     test('add rows', () {
@@ -340,6 +375,25 @@ void table_simple() {
       //print(t);
       expect([t.nrow, t.ncol], [2, 4]);
       expect(t.colnames, ['code', 'Tmin', 'Tmax', 'code_Y']);
+    });
+
+    test('table copy', () {
+      var t = Table.from([
+        {'year': 2020, 'BOS': 30, 'ATL': 95},
+        {'year': 2021, 'BOS': 32, 'ATL': 100}
+      ]);
+      var t2 = t.copy();
+      expect(t2.colnames, ['year', 'BOS', 'ATL']);
+      expect(t2.nrow, 2);
+
+      var t3 = t.copy(colnames: ['year', 'ATL']);
+      expect(t3.colnames, ['year', 'ATL']);
+      expect(t3.nrow, 2);
+
+      // copy also reorders
+      var t4 = t.copy(colnames: ['ATL', 'BOS']);
+      expect(t4.colnames, ['ATL', 'BOS']);
+      expect(t4.nrow, 2);
     });
 
     test('is rbind imutable?', () {

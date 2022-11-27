@@ -3,17 +3,15 @@ library table_base;
 import 'dart:collection';
 import 'dart:math';
 import 'package:collection/collection.dart';
-import 'package:more/ordering.dart';
+import 'package:more/comparator.dart';
 import 'package:csv/csv.dart';
 import 'column.dart';
-
 
 enum JoinType { outer, left, right, inner }
 
 enum AlignType { first, last, center }
 
 enum NullOrdering { first, last }
-
 
 /// A tabular view of columnar data iterable by row.  A table holds observations
 /// of different variables.  Each variable is stored in a [Column].
@@ -48,8 +46,9 @@ class Table extends Object with IterableMixin<Map?> {
     'columnSeparation': ' ',
     'format': <String, String Function(dynamic)>{},
     'columnWidth': <String, int>{},
-    'fillValue': null,     // what to replace nulls with.  Need to reconsider if this should be a column value not a table value!
-    'nullToString': null,  // how to treat nulls when printing
+    'fillValue':
+        null, // what to replace nulls with.  Need to reconsider if this should be a column value not a table value!
+    'nullToString': null, // how to treat nulls when printing
   };
 
   Map<String, dynamic>? _options;
@@ -70,7 +69,8 @@ class Table extends Object with IterableMixin<Map?> {
 
   Map<String, dynamic> get options => _options ?? defaultOptions;
 
-  set options(Map<String,dynamic> xs) => _options = Map.from(xs);
+  /// Set the table options directly (overwriting the default options.)
+  set options(Map<String, dynamic> xs) => _options = Map.from(xs);
 
   /// Modify the current options with the keys available in [xs].
   void setOptions(Map<String, dynamic> xs) {
@@ -92,25 +92,27 @@ class Table extends Object with IterableMixin<Map?> {
   /// Only the keys of a row that overlap with the keys from the first row
   /// are added to the table.  Rows don't need to have keys in the same order.
   ///
-  /// If [colnamesFromFirstRow] is `true` the keys of the first element of rows
-  /// will determine the column names of the table.
+  /// If [colnames] is not specified, the table column names
+  /// will be determined by taking a set union of keys from each row.
   ///
   /// Missing data for a column will be assigned `null`.
   ///
   ///
   Table.from(Iterable<Map?> rows,
-      {bool colnamesFromFirstRow = true, Map<String, dynamic>? options}) {
+      {List<String>? colnames, Map<String, dynamic>? options}) {
     _options = {...defaultOptions};
     if (options != null) setOptions(options);
-    if (colnamesFromFirstRow) {
-      _colnames = rows.first!.keys.map((e) => e.toString()).toList();
-    } else {
+
+    if (colnames == null) {
       // it's easiest to traverse twice -- unfortunately
       var _names = <String>{};
       rows.forEach((Map? row) =>
           _names = _names.union(row!.keys.map((e) => e.toString()).toSet()));
       _colnames = _names.toList();
+    } else {
+      _colnames = [...colnames];
     }
+
     for (var name in _colnames) {
       var column = Column([], name);
       _data.add(column);
@@ -144,7 +146,7 @@ class Table extends Object with IterableMixin<Map?> {
       return N;
     }).toList();
 
-    for (var j = 0; j < ncol; j++) {
+    for (var j = 0; j < _colnames.length; j++) {
       var block =
           columns[j].data.expand((e) => List.generate(nEach[j], (i) => e));
       // how many times you repeat the block
@@ -217,7 +219,7 @@ class Table extends Object with IterableMixin<Map?> {
   int get nrow => (_data.isEmpty) ? 0 : _data.first.data.length;
 
   /// Get the number of columns in the table.
-  int get ncol => (_colnames.isEmpty) ? 0 : _colnames.length;
+  int get ncol => (_data.isEmpty) ? 0 : _data.length;
 
   /// Return the names of table columns as a List.
   List<String> get colnames => _colnames;
@@ -275,12 +277,20 @@ class Table extends Object with IterableMixin<Map?> {
   }
 
   /// Make a copy of this table.
-  Table copy() {
-    var t = Table();
-    for (var j = 0; j < ncol; j++) {
-      t.addColumn(List.from(column(j).data), name: colnames[j]);
-    }
+  ///
+  /// If [colnames] is not specified, it copies the existing table.
+  ///
+  /// If [colnames] are specified, create a new table with a subset of the
+  /// existing columns.
+  ///
+  Table copy({List<String>? colnames}) {
+    colnames ??= _colnames;
 
+    var t = Table();
+    for (var j = 0; j < colnames.length; j++) {
+      var idx = _colnames.indexOf(colnames[j]);
+      t.addColumn(List.from(column(idx).data), name: colnames[j]);
+    }
     return t;
   }
 
@@ -498,13 +508,13 @@ class Table extends Object with IterableMixin<Map?> {
     } else {
       var by = groupBy.where((e) => colnames.contains(e)).toList();
       var vars = variables.where((e) => colnames.contains(e)).toList();
-      var _colIndex = Map.fromIterables(
-          colnames, List.generate(colnames.length, (i) => i));
+      var _colIndex =
+          Map.fromIterables(colnames, List.generate(colnames.length, (i) => i));
 
       var groups = _groupByIndex(
           this,
-          (e) => Map.fromIterables(
-              by, List.generate(by.length, (i) => e[by[i]])));
+          (e) =>
+              Map.fromIterables(by, List.generate(by.length, (i) => e[by[i]])));
 
       groups.forEach((k, List ind) {
         var row = Map.from(k as Map);
@@ -604,48 +614,13 @@ class Table extends Object with IterableMixin<Map?> {
     return res;
   }
 
-  /// Order the rows of the table with a natural order for some column names.
-  /// [orderBy] is a Map with the column name as the key and with the value either 1
-  /// (if the ordering is from lowest to highest) or -1 (if the ordering is to be done
-  /// from highest to lowest).
-  ///
-  /// For example, [orderBy = {'id': 1, 'code':-1}] will sort ascendingly on
-  /// column [id] and descendingly on column [code].
-  ///
-  /// Return a new table.
-  Table order(Map<String, int> orderBy,
-      {NullOrdering nullOrdering = NullOrdering.first}) {
-    throw UnimplementedError('Come back later.');
-    var keys = orderBy.keys.toList();
-    Ordering ord;
 
-//     keys.forEach((String name) {
-//       if (!colnames.contains(name)) throw 'Column name $name does not exist.';
-//       var aux = Ordering.natural();
-//       if (orderBy[name] == -1) aux = aux.reversed;
-//       switch (nullOrdering) {
-//         case NullOrdering.first:
-//           aux = aux.nullsFirst;
-//           break;
-//         case NullOrdering.last:
-//           aux = aux.nullsLast;
-//           break;
-//       }
-//       aux = aux.onResultOf((row) => row[name]);
-//       if (name == keys.first) {
-//         ord = aux;
-//       } else {
-//         ord = ord.compound(aux);
-//       }
-//     });
-//     return Table.from(ord.sorted(this).cast<Map>());
-    return this;
-  }
-
-  /// Order the rows of the table according to a specific Ordering.
+  /// Order the rows of the table according to a specific Comparator.
   /// Return a new table.
-  Table orderWith(Ordering ordering) =>
-      Table.from(ordering.sorted(this) as List<Map?>);
+  ///
+  /// See the examples from [sort_test] on how to construct a [Comparator].
+  Table orderWith(Comparator ordering) =>
+      Table.from(ordering.sorted(this) as List<Map>);
 
   /// A melt method similar to the R reshape package.
   /// It reshapes the table into a long form, one row for all id variables and one
@@ -709,8 +684,8 @@ class Table extends Object with IterableMixin<Map?> {
   Table _pivot(List<String> vertical, List<String> horizontal,
       {String variable = 'value', dynamic fill}) {
     // group rows
-    Function _fg = (Map row) =>
-        Map.fromIterables(vertical, vertical.map((g) => row[g]));
+    Function _fg =
+        (Map row) => Map.fromIterables(vertical, vertical.map((g) => row[g]));
     var ind = _groupByIndex(this, _fg);
     var indValue = colnames.indexOf(variable);
 
@@ -736,7 +711,7 @@ class Table extends Object with IterableMixin<Map?> {
     });
 
     if (fill != null) _fillValue = fill;
-    var t = Table.from(res, colnamesFromFirstRow: false);
+    var t = Table.from(res);
 
     if (fill != null) _fillValue = null; // restore the default
     return t;
@@ -769,6 +744,22 @@ class Table extends Object with IterableMixin<Map?> {
     return res;
   }
 
+  /// Reorder columns (useful for printing.)  For example if columns are
+  /// ['C', 'A', 'B'], reorder them to ['A', 'B', 'C'].
+  ///
+  void reorderColumns(List<String> newColumnNames) {
+    if (newColumnNames.length != colnames.length) {
+      throw StateError('Column names should have the same length.');
+    }
+    for (var i = 0; i < newColumnNames.length; i++) {
+      var idx = _colnames.indexOf(newColumnNames[i]);
+      _colnames.insert(i, newColumnNames[i]);
+      _data.insert(i, _data[idx]);
+    }
+    _colnames = _colnames.sublist(0, newColumnNames.length);
+    _data = _data.sublist(0, newColumnNames.length);
+  }
+
   /// Output the table as a CSV string.
   String toCsv() {
     var nullToString = options['nullToString'] ?? '';
@@ -777,7 +768,7 @@ class Table extends Object with IterableMixin<Map?> {
     for (var j = 0; j < ncol; j++) {
       var cj = column(j);
       for (var i = 0; i < nrow; i++) {
-        if (cj[i]== null) {
+        if (cj[i] == null) {
           rows[i + 1].add(nullToString);
         } else {
           rows[i + 1].add(cj[i]);
@@ -794,9 +785,14 @@ class Table extends Object with IterableMixin<Map?> {
     var res = <String>[];
     for (var j = 0; j < ncol; j++) {
       var columnWidth = options['columnWidth'][column(j).name] as int?;
-      var columnFormat = options['format'][column(j).name] as String Function(dynamic)?;
-      var aux = column(j).paddedOutput(width: columnWidth, format: columnFormat,
-          nullToString: options['nullToString']).toList();
+      var columnFormat =
+          options['format'][column(j).name] as String Function(dynamic)?;
+      var aux = column(j)
+          .paddedOutput(
+              width: columnWidth,
+              format: columnFormat,
+              nullToString: options['nullToString'])
+          .toList();
 
       for (var i = 0; i < nrow + 1; i++) {
         out[i][j] = aux[i];

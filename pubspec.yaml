@@ -1,6 +1,6 @@
 name: table
 description: A table like data structure for Dart
-version: 2.1.0
+version: 2.2.0
 homepage: https://github.com/thumbert/table.git
 publish_to: none
 

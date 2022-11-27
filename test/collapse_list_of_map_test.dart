@@ -3,7 +3,7 @@ library test.collapse_list_of_map_test;
 import 'package:table/src/collapse_list_of_map.dart';
 import 'package:test/test.dart';
 
-tests() {
+void tests() {
   group('rows to columns:', () {
     test('one column', () {
       var xs = [
@@ -42,6 +42,6 @@ tests() {
   });
 }
 
-main() {
+void main() {
   tests();
 }

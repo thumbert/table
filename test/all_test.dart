@@ -11,6 +11,7 @@ import 'nest_test.dart' as nest;
 import 'rename_columns_test.dart' as rename;
 import 'reorder_columns_test.dart' as reorder;
 import 'reshape_test.dart' as reshape;
+import 'sort_test.dart' as sort;
 import 'table_test.dart' as table;
 import 'unique_test.dart' as unique;
 import 'union_test.dart' as union;
@@ -27,6 +28,7 @@ void main() {
   rename.tests();
   reorder.tests();
   reshape.tests();
+  sort.tests();
   table.table_simple();
   table.table_html();
   unique.tests();

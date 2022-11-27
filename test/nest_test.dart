@@ -1,7 +1,6 @@
 library test.nest;
 
 import 'package:dama/dama.dart';
-import 'package:table/src/flatten_map.dart';
 import 'package:table/src/nest.dart';
 import 'package:test/test.dart';
 import 'data.dart';

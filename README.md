@@ -4,6 +4,24 @@ Various utilities for interacting with tabular like data.  In particular,
 it contains an implementation of the *Nest* framework as introduced in 
 the [D3](https://github.com/d3/d3-collection#nests) nests package.
 
+## Table 
+Make a table like data structure for easy data manipulation.  Currently, mostly use 
+it for pretty printing and `toCsv()` method. 
+
+Create a table from a json like iterable of rows
+```dart
+var tbl = Table.from(
+    [
+      {'year': 2021, '11': 37, '12': 35},
+      {'year': 2022, '1': 28, '2': 31},
+    ],
+    colnamesFromFirstRow: false,
+    options: {
+      'nullToString': '',
+    });
+```
+This will create a table with `5` columns
+
 ## Usage
 Here's an example using Cleveland's barley data.  
 To calculate the total yield by year and variety do

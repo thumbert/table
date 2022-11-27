@@ -1,11 +1,26 @@
 # Changelog
 
 ## TODO:
-- Make a setter `options` for `Table`.
-- Don't print `null`s.  Make an option to ignore them by default. 
 
-## 2.1.0, Release 2022-11-26
+## 2.2.0 (Released on 2022-11-27)
+- Removed argument `colnamesFromFirstRow` from the `Table.from()` constructor and 
+  added a list of column names    
+- Cleaned up some package `more` deprecations, remove `Ordering` and use `Comparator`
+- Add another example in for `sort_test` to show how to sort by two columns
+- Cleaned all analysis errors
+
+## 2.1.1 (Released on 2022-11-27)
+- Better treatment for table `toString()` method.  Now using `options` to format  
+  individual columns
+- Don't print `null`s by default in the `toCsv()` method.  If you need a
+  different way to show `null`s, set `options['nullToString']`.
+- Modified `copy()` method to accept a list of columns.  Can be used to create 
+  another table with a subset of columns in potentially different order
+- Added `reorderColumns()` method to shuffle columns in place
+
+## 2.1.0 (Released on 2022-11-26)
 - Refactor `Column` to its own file
+- Make a setter `options` so you can set the options directly
 - Added a new option `nullToString` to deal with null values when printing 
 - Better treatment for table `toString()` method.  Now using `options` to format  
 individual columns

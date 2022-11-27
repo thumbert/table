@@ -6,7 +6,7 @@ library melt;
 /// Use the same name as R's melt from the reshape package.
 ///
 List<Map<String,dynamic>> melt(List<Map<String,dynamic>> xs,
-    Set<String> tagsKey, Set<String> variablesKey, {String value: 'value'}) {
+    Set<String> tagsKey, Set<String> variablesKey, {String value = 'value'}) {
   var aux = <Map<String,dynamic>>[];
   for (var x in xs) {
     for (var key in variablesKey) {
