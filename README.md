@@ -10,17 +10,22 @@ it for pretty printing and `toCsv()` method.
 
 Create a table from a json like iterable of rows
 ```dart
-var tbl = Table.from(
-    [
+var tbl = Table.from([
       {'year': 2021, '11': 37, '12': 35},
       {'year': 2022, '1': 28, '2': 31},
-    ],
-    colnamesFromFirstRow: false,
-    options: {
-      'nullToString': '',
-    });
+    ]);
 ```
 This will create a table with `5` columns
+
+
+| year | 11 | 12 | 1 | 2 |
+| ---- | -- | -- | - | - |
+| 2021 | 37 | 35 | null | null |
+| 2022 | null | null | 28 | 31 |
+
+Note how `null`s are created for missing values.  Also note that the order of the 
+columns is dictated by the input rows. 
+
 
 ## Usage
 Here's an example using Cleveland's barley data.  
