@@ -5,8 +5,8 @@ it contains an implementation of the *Nest* framework as introduced in
 the [D3](https://github.com/d3/d3-collection#nests) nests package.
 
 ## Table 
-Make a table like data structure for easy data manipulation.  Currently, mostly use 
-it for pretty printing and `toCsv()` method. 
+Make a table like data structure for easy data manipulation.  Currently, mostly used 
+for pretty printing and the `toCsv()` method. 
 
 Create a table from a json like iterable of rows
 ```dart
@@ -28,7 +28,7 @@ columns is dictated by the input rows.
 
 
 ## Usage
-Here's an example using Cleveland's barley data.  
+Here's an example of using `nest` for aggregation with Cleveland's barley data.  
 To calculate the total yield by year and variety do
 
 ```dart
@@ -38,7 +38,8 @@ var nest = Nest()
   ..rollup((List xs) => sum(xs.map((e) => e['yield'])));
 var res = nest.map(barley) as Map;
 ```
-The result will be a two-level nested map.
+The result will be a two-level nested map.  You can flatten it using the function 
+`flattenMap`. 
 
 
  
