@@ -5,7 +5,7 @@ homepage: https://github.com/thumbert/table.git
 publish_to: none
 
 environment:
-  sdk: '>=2.12.0 <3.0.0'
+  sdk: '>=2.19.0 <4.0.0'
 
 dependencies:
   csv: ^5.0.0

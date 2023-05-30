@@ -197,6 +197,15 @@ void table_simple() {
       expect(t.toCsv(), 'code,value\r\nBOS,23.0\r\nBWI,\r\nORD,NaN\r\nATL,144');
     });
 
+    test('table toCsv() for data that has commas', () {
+      var rows = [
+        {'variable': 'Median', 'value': 100.5},
+        {'variable': 'Mean, 10 years', 'value': 112.7},
+      ];
+      var t = Table.from(rows);
+      expect(t.toCsv(), 'variable,value\r\nMedian,100.5\r\n"Mean, 10 years",112.7');
+    });
+
     test('row iterator', () {
       var t = Table()
         ..addColumn(['BWI', 'BWI', 'BOS'], name: 'code')

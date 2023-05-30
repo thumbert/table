@@ -2,6 +2,10 @@
 
 ## TODO:
 
+## Released on 2023-05-29
+- Bump the skd upper limit to 4.0.0
+- Added more tests for toCsv()
+
 ## 2.2.0 (Released on 2022-11-27)
 - Removed argument `colnamesFromFirstRow` from the `Table.from()` constructor and 
   added a list of column names    
