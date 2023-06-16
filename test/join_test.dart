@@ -1,3 +1,5 @@
+import 'package:table/src/join.dart';
+import 'package:table/src/table_base.dart';
 import 'package:test/test.dart';
 import 'package:table/table.dart' as table;
 import 'package:table/table_base.dart' as table_base;
@@ -69,6 +71,50 @@ void tests() {
       expect(ti.length, 2);
       expect(ti.map((e) => e['code']).toList(), ['BOS', 'LAX']);
       expect(ti.map((e) => e['value']).toList(), [65, 33]);
+    });
+    test('left join', () {
+      var t1 = [
+        {'group1': 'A1', 'group2': 'B1', 'value1': 10},
+        {'group1': 'A1', 'group2': 'B2', 'value1': 20},
+        {'group1': 'A1', 'group2': 'B3', 'value1': 30},
+      ];
+      var t2 = [
+        {'group1': 'A1', 'group2': 'B2', 'value2': 5},
+        {'group1': 'A1', 'group2': 'B3', 'value2': 6},
+      ];
+      var res = join(t1, t2, joinType: JoinType.left, f: (x,y) {
+        return [
+          MapEntry('diff', x['value1'] - (y['value2'] ?? 0)),
+        ];
+      });
+      expect(res.length, 3);
+      expect(res, [
+        {'group1': 'A1', 'group2': 'B2', 'diff': 15},
+        {'group1': 'A1', 'group2': 'B3', 'diff': 24},
+        {'group1': 'A1', 'group2': 'B1', 'diff': 10},
+      ]);
+    });
+    test('right join', () {
+      var t1 = [
+        {'group1': 'A1', 'group2': 'B2', 'value1': 20},
+        {'group1': 'A1', 'group2': 'B3', 'value1': 30},
+      ];
+      var t2 = [
+        {'group1': 'A1', 'group2': 'B1', 'value2': 10},
+        {'group1': 'A1', 'group2': 'B2', 'value2': 5},
+        {'group1': 'A1', 'group2': 'B3', 'value2': 6},
+      ];
+      var res = join(t1, t2, joinType: JoinType.right, f: (x,y) {
+        return [
+          MapEntry('diff', (x['value1'] ?? 0) - y['value2']),
+        ];
+      });
+      expect(res.length, 3);
+      expect(res, [
+        {'group1': 'A1', 'group2': 'B2', 'diff': 15},
+        {'group1': 'A1', 'group2': 'B3', 'diff': 24},
+        {'group1': 'A1', 'group2': 'B1', 'diff': -10},
+      ]);
     });
   });
 }

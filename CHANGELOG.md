@@ -2,6 +2,10 @@
 
 ## TODO:
 
+## Released on 2023-06-16
+- Fix bug in join for the JoinType.left and JoinType.right when f != null.
+  I was not treating the f != null correctly.  Ouch!
+
 ## Released on 2023-05-29
 - Bump the skd upper limit to 4.0.0
 - Added more tests for toCsv()

@@ -81,9 +81,13 @@ List<Map<String, dynamic>> join<K>(
     var rFill = Map.fromIterables(rKeys, List.filled(rKeys.length, null));
     // loop only over the keys that are missing in other table
     for (var group in g1k.difference(g2k)) {
-      for (Map v1 in g1[group]) {
-        // as the key is not there, add nulls for the missing variables in other
-        res.add(Map<String, dynamic>.from(v1)..addAll(rFill));
+      for (Map<String,dynamic> v1 in g1[group]) {
+        if (f == null) {
+          // as the key is not there, add nulls for the missing variables in other
+          res.add(Map<String, dynamic>.from(v1)..addAll(rFill));
+        } else {
+          res.add(Map<String, dynamic>.from(group!)..addEntries(f(v1, {})));
+        }
       }
     }
   }
@@ -94,9 +98,13 @@ List<Map<String, dynamic>> join<K>(
     var lFill = Map.fromIterables(lKeys, List.filled(lKeys.length, null));
     // loop only over the keys that are missing in this table
     for (var group in g2k.difference(g1k)) {
-      for (Map v2 in g2[group]) {
-        // if the key is not there, add nulls for the missing variables in this
-        res.add(Map<String, dynamic>.from(v2)..addAll(lFill));
+      for (Map<String,dynamic> v2 in g2[group]) {
+        if (f == null) {
+          // if the key is not there, add nulls for the missing variables in this
+          res.add(Map<String, dynamic>.from(v2)..addAll(lFill));
+        } else {
+          res.add(Map<String, dynamic>.from(group!)..addEntries(f({}, v2)));
+        }
       }
     }
   }
