@@ -5,15 +5,16 @@ homepage: https://github.com/thumbert/table.git
 publish_to: none
 
 environment:
-  sdk: '>=2.19.0 <4.0.0'
+  sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
   csv: ^5.0.0
   dama:
     git: https://github.com/thumbert/dama.git
-  more: ^3.0.1
+  more: ^4.0.1
 
 dev_dependencies:
+  lints: ^3.0.0
   pedantic: ^1.11.0
   test: ^1.16.5
 
