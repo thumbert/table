@@ -13,7 +13,7 @@ void tests() {
         {'code': 'BWI', 'Tmin': 32, 'Tmax': 100}
       ];
 
-      var ord = naturalComparator<String>()
+      var ord = naturalComparable<String>
           .reversed
           .onResultOf((Map<String, dynamic> x) => x['code']!);
       var res = ord.sorted(xs);
@@ -29,10 +29,10 @@ void tests() {
         {'code': 'BWI', 'Tmin': 32, 'Tmax': 100}
       ];
 
-      var byCode = naturalComparator<String>()
+      var byCode = naturalComparable<String>
           .reversed
           .onResultOf((Map<String, dynamic> x) => x['code']);
-      var byTmax = naturalComparator<num>()
+      var byTmax = naturalComparable<num>
           .nullsLast
           .onResultOf((Map<String, dynamic> x) => x['Tmax']);
 

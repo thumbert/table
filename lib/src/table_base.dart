@@ -857,7 +857,7 @@ class Table extends Object with IterableMixin<Map?> {
   }
 }
 
-class _TableIterator extends Iterator<Map?> {
+class _TableIterator implements Iterator<Map?> {
   Map? _current;
   int? ind;
   int? nrow;

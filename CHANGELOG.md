@@ -2,6 +2,9 @@
 
 ## TODO:
 
+## Released 2023-11-12
+- Bumped up dependencies.  Fixed lints.
+
 ## Released on 2023-06-16
 - Fix bug in join for the JoinType.left and JoinType.right when f != null.
   I was not treating the f != null correctly.  Ouch!
