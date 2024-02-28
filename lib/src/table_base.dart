@@ -614,7 +614,6 @@ class Table extends Object with IterableMixin<Map?> {
     return res;
   }
 
-
   /// Order the rows of the table according to a specific Comparator.
   /// Return a new table.
   ///
@@ -815,6 +814,7 @@ class Table extends Object with IterableMixin<Map?> {
   /// </style>
   /// ```
   String toHtml() {
+    var nullToString = options['nullToString'] ?? '';
     var out = StringBuffer();
     out.writeln('<table>');
     out.writeAll([
@@ -825,7 +825,7 @@ class Table extends Object with IterableMixin<Map?> {
     for (var r = 0; r < nrow; r++) {
       out.write('<tr>');
       for (var c = 0; c < ncol; c++) {
-        out.write('<td>${column(c)[r]}</td>');
+        out.write('<td>${column(c)[r] ?? nullToString}</td>');
       }
       out.write('</tr>\n');
     }
