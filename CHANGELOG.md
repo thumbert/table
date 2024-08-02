@@ -2,6 +2,9 @@
 
 ## TODO:
 
+## Released on 2024-08-02
+- Bumped up dependencies
+
 ## Released on 2024-02-28
 - toHtml() method on Table now correctly applies the 'nullToString' option.
 
