@@ -2,6 +2,10 @@
 
 ## TODO:
 
+## Release on 2024-09-23
+- Improved toHtml() method.  Now allows for adding a class name, caption and 
+  customized header rows. 
+
 ## Released on 2024-08-02
 - Bumped up dependencies
 

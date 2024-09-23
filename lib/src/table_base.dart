@@ -803,25 +803,48 @@ class Table extends Object with IterableMixin<Map?> {
     return res.join('\n');
   }
 
-  /// Create an Html table
-  /// For example [style] can be
-  /// ```
-  /// <style>
-  /// table, th {
-  ///   border-spacing: 2px;
-  ///   border:1px solid red;
-  /// }
-  /// </style>
-  /// ```
-  String toHtml() {
+  /// Create an Html table.
+  ///
+  /// Support a subset of features:
+  /// * a class name to allow styling via an external CSS file.
+  /// * a caption for the table.
+  /// * additional header rows before the actual data.  This can be useful to
+  ///   show grouping of columns.
+  ///
+  /// See the tests for some examples.
+  /// 
+  String toHtml({
+    String? className,
+    String? caption,
+    List<String>? extraHeaders,
+    bool includeColumnNames = true,
+  }) {
     var nullToString = options['nullToString'] ?? '';
     var out = StringBuffer();
-    out.writeln('<table>');
-    out.writeAll([
-      '<tr>',
-      ...[for (var e in colnames) '<th>$e</th>'],
-      '</tr>\n',
-    ]);
+    if (className == null) {
+      out.writeln('<table>');
+    } else {
+      out.writeln('<table class="$className">');
+    }
+    // add caption
+    if (caption != null) {
+      out.writeln('<caption>$caption</caption>');
+    }
+    // add additional headers
+    if (extraHeaders != null) {
+      for (var e in extraHeaders) {
+        out.writeln(e);
+      }
+    }
+    // add headers from column names
+    if (includeColumnNames) {
+      out.writeAll([
+        '<tr>',
+        ...[for (var e in colnames) '<th>$e</th>'],
+        '</tr>\n',
+      ]);
+    }
+    // add rows with table content
     for (var r = 0; r < nrow; r++) {
       out.write('<tr>');
       for (var c = 0; c < ncol; c++) {

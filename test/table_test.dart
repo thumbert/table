@@ -142,14 +142,12 @@ void table_simple() {
     });
 
     test('print table with missing observations (issue 3)', () {
-      var tbl = Table.from(
-          [
-            {'year': 2021, '10': 42, '11': 37, '12': 35},
-            {'year': 2022, '1': 28, '2': 31, '3': 36},
-          ],
-          options: {
-            'nullToString': '',
-          });
+      var tbl = Table.from([
+        {'year': 2021, '10': 42, '11': 37, '12': 35},
+        {'year': 2022, '1': 28, '2': 31, '3': 36},
+      ], options: {
+        'nullToString': '',
+      });
       tbl.reorderColumns(['year', '1', '2', '3', '10', '11', '12']);
       expect(
           tbl.toString(),
@@ -203,7 +201,8 @@ void table_simple() {
         {'variable': 'Mean, 10 years', 'value': 112.7},
       ];
       var t = Table.from(rows);
-      expect(t.toCsv(), 'variable,value\r\nMedian,100.5\r\n"Mean, 10 years",112.7');
+      expect(t.toCsv(),
+          'variable,value\r\nMedian,100.5\r\n"Mean, 10 years",112.7');
     });
 
     test('row iterator', () {
@@ -573,7 +572,7 @@ void table_simple() {
 
 void table_html() {
   group('Table toHtml() method', () {
-    test('simple 1', () {
+    test('simple table', () {
       var tbl = Table.from([
         {
           'region': 'CAISO',
@@ -597,6 +596,51 @@ void table_html() {
 </table>
 ''');
     });
+
+    test('table with class name, caption, and extra headers ', () {
+      var tbl = Table.from([
+        {
+          'Term': 'Jan22-Mar22',
+          'HourCharging': 1,
+          'CountCharging': 20,
+          'HourDischarging': 17,
+          'CountDischarging': 22,
+        },
+        {
+          'Term': 'Jan22-Mar22',
+          'HourCharging': 0,
+          'CountCharging': 16,
+          'HourDischarging': 16,
+          'CountDischarging': 20,
+        },
+      ]);
+      var out = tbl.toHtml(
+          className: 'best-blocks-table',
+          caption: '<b>Table:</b>An amazing table',
+          includeColumnNames: false,
+          extraHeaders: [
+            '''
+  <tr>
+    <th> </th>
+    <th colspan="2" style="background-color: #ffb3b3;">Charging</th>
+    <th colspan="2" style="background-color: #9fdfbf;">Discharging</th>
+  </tr>
+''',
+            '''
+  <tr>
+    <th>Term</th>
+    <th>Hour</th>
+    <th>Count</th>
+    <th>Hour</th>
+    <th>Count</th>
+  </tr>
+''',
+          ]);
+      // print(out);
+      expect(out.contains('class='), true);
+      expect(out.contains('<caption>'), true);
+      expect(out.contains('Term'), true);
+    });
   });
 }
 
@@ -617,7 +661,7 @@ void speed_test() {
 
 void main() {
   table_simple();
-  // table_html();
+  table_html();
   //speed_test();
 
 //  Ordering ord = Ordering.natural().nullsFirst();
