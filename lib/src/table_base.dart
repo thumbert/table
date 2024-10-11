@@ -812,7 +812,7 @@ class Table extends Object with IterableMixin<Map?> {
   ///   show grouping of columns.
   ///
   /// See the tests for some examples.
-  /// 
+  ///
   String toHtml({
     String? className,
     String? caption,
@@ -830,6 +830,7 @@ class Table extends Object with IterableMixin<Map?> {
     if (caption != null) {
       out.writeln('<caption>$caption</caption>');
     }
+    out.writeln('<thead>');
     // add additional headers
     if (extraHeaders != null) {
       for (var e in extraHeaders) {
@@ -844,7 +845,9 @@ class Table extends Object with IterableMixin<Map?> {
         '</tr>\n',
       ]);
     }
+    out.writeln('</thead>');
     // add rows with table content
+    out.writeln('<tbody>');
     for (var r = 0; r < nrow; r++) {
       out.write('<tr>');
       for (var c = 0; c < ncol; c++) {
@@ -852,6 +855,7 @@ class Table extends Object with IterableMixin<Map?> {
       }
       out.write('</tr>\n');
     }
+    out.writeln('</tbody>');
     out.writeln('</table>');
     return out.toString();
   }

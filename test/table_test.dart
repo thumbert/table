@@ -589,10 +589,14 @@ void table_html() {
       ]);
       var out = tbl.toHtml();
       expect(out, '''<table>
+<thead>
 <tr><th>region</th><th>value</th></tr>
+</thead>
+<tbody>
 <tr><td>CAISO</td><td>83499</td></tr>
 <tr><td>PJM</td><td>423412</td></tr>
 <tr><td>ISONE</td><td>84271.34</td></tr>
+</tbody>
 </table>
 ''');
     });
