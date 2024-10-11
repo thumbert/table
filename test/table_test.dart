@@ -601,6 +601,37 @@ void table_html() {
 ''');
     });
 
+    test('simple table with format', () {
+      var tbl = Table.from([
+        {
+          'region': 'CAISO',
+          'value': 83499,
+        },
+        {
+          'region': 'PJM',
+          'value': 423412,
+        },
+        {
+          'region': 'ISONE',
+          'value': 84271.34,
+        },
+      ], options: {
+        'format': {'value': (e) => (e as num).toStringAsFixed(1)}
+      });
+      var out = tbl.toHtml();
+      expect(out, '''<table>
+<thead>
+<tr><th>region</th><th>value</th></tr>
+</thead>
+<tbody>
+<tr><td>CAISO</td><td>83499.0</td></tr>
+<tr><td>PJM</td><td>423412.0</td></tr>
+<tr><td>ISONE</td><td>84271.3</td></tr>
+</tbody>
+</table>
+''');
+    });
+
     test('table with class name, caption, and extra headers ', () {
       var tbl = Table.from([
         {

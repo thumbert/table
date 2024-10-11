@@ -4,6 +4,7 @@
 
 ## Release on 2024-10-11
 - Add thead and tbody to the toHtml() method. 
+- If specified, use column format in toHtml() method. 
 
 ## Release on 2024-09-23
 - Improved toHtml() method.  Now allows for adding a class name, caption and 

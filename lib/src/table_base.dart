@@ -851,7 +851,12 @@ class Table extends Object with IterableMixin<Map?> {
     for (var r = 0; r < nrow; r++) {
       out.write('<tr>');
       for (var c = 0; c < ncol; c++) {
-        out.write('<td>${column(c)[r] ?? nullToString}</td>');
+        var columnFormat =
+            options['format'][column(c).name] as String Function(dynamic)?;
+        var value = (columnFormat != null)
+            ? columnFormat(column(c)[r])
+            : (column(c)[r] ?? nullToString);
+        out.write('<td>${value}</td>');
       }
       out.write('</tr>\n');
     }
