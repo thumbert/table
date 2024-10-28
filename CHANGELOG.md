@@ -2,6 +2,9 @@
 
 ## TODO:
 
+## Release on 2024-10-28
+- Add removeColumns for convenience. 
+
 ## Release on 2024-10-11
 - Add thead and tbody to the toHtml() method. 
 - If specified, use column format in toHtml() method. 

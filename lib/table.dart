@@ -12,6 +12,7 @@ export 'src/join.dart';
 export 'src/flatten_map.dart';
 export 'src/melt.dart';
 export 'src/nest.dart';
+export 'src/remove_columns.dart';
 export 'src/rename_columns.dart';
 export 'src/reorder_columns.dart';
 export 'src/reshape.dart';

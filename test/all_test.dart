@@ -8,6 +8,7 @@ import 'flatten_test.dart' as flatten;
 import 'join_test.dart' as join;
 import 'melt_test.dart' as melt;
 import 'nest_test.dart' as nest;
+import 'remove_columns_test.dart' as remove;
 import 'rename_columns_test.dart' as rename;
 import 'reorder_columns_test.dart' as reorder;
 import 'reshape_test.dart' as reshape;
@@ -25,6 +26,7 @@ void main() {
   join.tests();
   melt.tests();
   nest.tests();
+  remove.tests();
   rename.tests();
   reorder.tests();
   reshape.tests();
