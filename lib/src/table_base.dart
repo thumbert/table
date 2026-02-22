@@ -267,8 +267,8 @@ class Table extends Object with IterableMixin<Map?> {
     } else {
       var aux = {};
       for (var i = 0; i < nrow; i++) {
-        var rowi = row(i);
-        columnNames.forEach((name) => aux[name] = rowi[name]);
+        var r = row(i);
+        columnNames.forEach((name) => aux[name] = r[name]);
         uRows.add(aux);
       }
     }

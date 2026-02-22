@@ -2,6 +2,9 @@
 
 ## TODO:
 
+## Release on 2026-02-22
+- Bump up some dependencies
+
 ## Release on 2024-10-28
 - Add removeColumns for convenience. 
 

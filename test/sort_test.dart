@@ -15,7 +15,7 @@ void tests() {
 
       var ord = naturalComparable<String>
           .reversed
-          .onResultOf((Map<String, dynamic> x) => x['code']!);
+          .keyOf((Map<String, dynamic> x) => x['code']!);
       var res = ord.sorted(xs);
       expect(res.map((e) => e['code']).toList(), ['BWI', 'BWI', 'BOS', 'BOS']);
     });
@@ -31,10 +31,10 @@ void tests() {
 
       var byCode = naturalComparable<String>
           .reversed
-          .onResultOf((Map<String, dynamic> x) => x['code']);
+          .keyOf((Map<String, dynamic> x) => x['code']!);
       var byTmax = naturalComparable<num>
           .nullsLast
-          .onResultOf((Map<String, dynamic> x) => x['Tmax']);
+          .keyOf((Map<String, dynamic> x) => x['Tmax']!);
 
       var comparator = byCode.thenCompare(byTmax);
       var res = comparator.sorted(xs);
