@@ -783,7 +783,8 @@ class Table extends Object with IterableMixin<Map?> {
     var out = List.generate(nrow + 1, (i) => List.filled(ncol, ''));
     var res = <String>[];
     for (var j = 0; j < ncol; j++) {
-      var columnWidth = options['columnWidth'][column(j).name] as int?;
+      var columnWidth =
+          (options['columnWidth'] as Map?)?[column(j).name] as int?;
       var columnFormat =
           options['format'][column(j).name] as String Function(dynamic)?;
       var aux = column(j)

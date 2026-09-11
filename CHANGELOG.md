@@ -2,6 +2,10 @@
 
 ## TODO:
 
+## Release on 2026-09-11
+- Fix bug in the toString() method when `options[columnWidth]` does 
+  not exist
+
 ## Release on 2026-02-22
 - Bump up some dependencies
 

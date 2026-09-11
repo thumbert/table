@@ -141,6 +141,20 @@ void table_simple() {
           '       Maryland  1.41421');
     });
 
+    test('print table calculates width when columnWidth option is missing', () {
+      var t = Table.from([
+        {'state': 'Ohio'},
+        {'state': 'Maryland'},
+      ]);
+      t.options = {
+        'columnSeparation': ' ',
+        'format': <String, String Function(dynamic)>{},
+        'nullToString': null,
+      };
+
+      expect(t.toString(), '   state\n    Ohio\nMaryland');
+    });
+
     test('print table with missing observations (issue 3)', () {
       var tbl = Table.from([
         {'year': 2021, '10': 42, '11': 37, '12': 35},

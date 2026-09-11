@@ -34,7 +34,7 @@ void tests() {
           .keyOf((Map<String, dynamic> x) => x['code']!);
       var byTmax = naturalComparable<num>
           .nullsLast
-          .keyOf((Map<String, dynamic> x) => x['Tmax']!);
+          .keyOf((Map<String, dynamic> x) => x['Tmax']);
 
       var comparator = byCode.thenCompare(byTmax);
       var res = comparator.sorted(xs);
