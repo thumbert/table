@@ -155,6 +155,21 @@ void table_simple() {
       expect(t.toString(), '   state\n    Ohio\nMaryland');
     });
 
+    test('print table uses default when columnSeparation option is missing',
+        () {
+      var t = Table.from([
+        {'state': 'Ohio', 'value': 1},
+        {'state': 'Maryland', 'value': 2},
+      ]);
+      t.options = {
+        'format': <String, String Function(dynamic)>{},
+        'columnWidth': <String, int>{},
+        'nullToString': null,
+      };
+
+      expect(t.toString(), '   state value\n    Ohio     1\nMaryland     2');
+    });
+
     test('print table with missing observations (issue 3)', () {
       var tbl = Table.from([
         {'year': 2021, '10': 42, '11': 37, '12': 35},

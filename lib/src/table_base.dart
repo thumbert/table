@@ -782,6 +782,8 @@ class Table extends Object with IterableMixin<Map?> {
   String toString() {
     var out = List.generate(nrow + 1, (i) => List.filled(ncol, ''));
     var res = <String>[];
+    var columnSeparation = options['columnSeparation'] as String? ??
+        defaultOptions['columnSeparation'] as String;
     for (var j = 0; j < ncol; j++) {
       var columnWidth =
           (options['columnWidth'] as Map?)?[column(j).name] as int?;
@@ -799,7 +801,7 @@ class Table extends Object with IterableMixin<Map?> {
       }
     }
     for (var i = 0; i < nrow + 1; i++) {
-      res.add(out[i].join(options['columnSeparation']));
+      res.add(out[i].join(columnSeparation));
     }
     return res.join('\n');
   }
