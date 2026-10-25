@@ -1,5 +1,3 @@
-library test.collections.flattenmap;
-
 import 'package:test/test.dart';
 import 'package:table/src/flatten_map.dart';
 
@@ -22,7 +20,6 @@ void test2() {
     'B3': {'Jan15': 5, 'Feb15': 6}
   };
 
-  //res.forEach(print);
   test('flattenMap, two nesting levels', () {
     List? res = flattenMap(data, ['level0', 'level1', 'value']);
     expect(res, [
@@ -100,7 +97,6 @@ void test2Names() {
       'B3': {'Jan15': 5, 'Feb15': 6}
     };
     var res = flattenMap(data, ['levelB', 'month', 'count', 'value']);
-    //res.forEach(print);
     expect(res, [
       {'levelB': 'B1', 'month': 'Jan15', 'count': 1},
       {'levelB': 'B1', 'month': 'Feb15', 'count': 2},
@@ -121,6 +117,23 @@ void test2Names() {
     expect(bux, [
       {'index': 0, 'CT': 10, 'MA': 11},
       {'index': 1, 'CT': 12, 'MA': 13},
+    ]);
+  });
+}
+
+/// Tests for handling other keys than Strings
+void testOtherKeys() {
+  test('flattenMap, other keys', () {
+    final data = {
+      ('A1', 'B1'): {'Jan15': 1, 'Feb15': 2},
+      ('A2', 'B2'): {'Jan15': 3, 'Feb15': 4},
+      ('A3', 'B3'): {'Jan15': 5, 'Feb15': 6}
+    };
+    final res = flattenMap(data, ['range']);
+    expect(res, [
+      {'range': ('A1', 'B1'), 'Jan15': 1, 'Feb15': 2},
+      {'range': ('A2', 'B2'), 'Jan15': 3, 'Feb15': 4},
+      {'range': ('A3', 'B3'), 'Jan15': 5, 'Feb15': 6},
     ]);
   });
 }
@@ -194,5 +207,6 @@ void main() {
     test3();
     test2Names();
     extractValuesTest();
+    testOtherKeys();
   });
 }
